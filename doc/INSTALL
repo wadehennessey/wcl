@@ -1,0 +1,24 @@
+WCL runs on x86 based machines running Linux 
+
+See wcl.text for porting information.
+
+INSTALLATION
+------------
+
+WCL is distributed in two parts - binaries and sources.
+
+The binary distribution contains compiled libraries for the basic 
+CL runtime and the compiler
+
+Refer to wcl.text for more details.
+
+DEBUGGING
+---------
+
+WGDB4-2 used to support WCL debugging under SunOS 4.X. It needs serious updating to be useful with current versions of GDB.
+
+RESTRICTIONS
+------------
+WGDB does not yet support special WCL debugging features.
+
+

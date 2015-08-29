@@ -1,0 +1,1028 @@
+
+;------------------------------------------------------------------------
+
+;Copyright 1989 by the Massachusetts Institute of Technology, Cambridge, 
+;Massachusetts.
+
+;Permission to use, copy, modify, and distribute this software and its
+;documentation for any purpose and without fee is hereby granted,
+;provided that this copyright and permission notice appear in all
+;copies and supporting documentation, and that the name of M.I.T. not
+;be used in advertising or publicity pertaining to distribution of the
+;software without specific, written prior permission. M.I.T. makes no
+;representations about the suitability of this software for any
+;purpose.  It is provided "as is" without express or implied warranty.
+
+;    M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+;    ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+;    M.I.T. BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+;    ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+;    WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+;    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+;    SOFTWARE.
+
+;------------------------------------------------------------------------
+
+
+		      Pretty Printing using XP
+
+			  Richard C. Waters
+
+
+Pretty printing has traditionally been a black box process, displaying
+program code using a set of fixed layout rules.  Its utility can be greatly
+enhanced by opening it up to user control.
+
+By providing direct access to the mechanisms within the pretty printer that
+make dynamic decisions about layout, the macros and functions
+PPRINT-LOGICAL-BLOCK, PPRINT-NEWLINE, and PPRINT-INDENT make it possible to
+specify pretty printing layout rules as a part of any function that
+produces output.  They also make it very easy for the detection of
+circularity and sharing, and abbreviation based on length and nesting depth
+to be supported by the function.  The function SET-PPRINT-DISPATCH makes it
+possible to associate a user-defined pretty printing function with any type
+of object.  Together, these facilities enable users to redefine the way
+code is displayed and allow the full power of pretty printing to be applied
+to complex combinations of data structures.
+
+		  Pretty Printing Control Variables
+
+*PRINT-RIGHT-MARGIN*                                             [variable]
+
+A primary goal of pretty printing is to keep the output between a pair of
+margins.  The left margin is set at the column where the output begins.  If
+this cannot be determined, the left margin is set to zero.
+
+When *PRINT-RIGHT-MARGIN* is not NIL, it specifies the right margin to use
+when making layout decisions.  When *PRINT-RIGHT-MARGIN* is NIL (the
+initial value), the right margin is set at the maximum line length that can
+be displayed by the output stream without wraparound or truncation.  If
+this cannot be determined, the right margin is set to an implementation
+dependent value.
+
+To allow for the possibility of variable-width fonts, *PRINT-RIGHT-MARGIN*
+is interpreted in terms of ems---the length of an "m" in the font being
+used to display characters on the relevant output stream at the moment when
+the variables are consulted.
+
+*PRINT-MISER-WIDTH*                                              [variable]
+
+If *PRINT-MISER-WIDTH* is not NIL, the pretty printer switches to a compact
+style of output (called miser style) whenever the width available for
+printing a substructure is less than or equal to *PRINT-MISER-WIDTH* ems.
+The initial value of *PRINT-MISER-WIDTH* is implementation-dependent.
+
+*PRINT-LINES*                                                    [variable]
+
+When given a value other than its initial value of NIL, *PRINT-LINES*
+limits the number of output lines produced when something is pretty
+printed.  If an attempt is made to go beyond *PRINT-LINES* lines, "
+.." is printed at the end of the last line followed by all of the
+suffixes (closing delimiters) that are pending to be printed.
+
+(let ((*print-right-margin* 25) (*print-lines* 3))
+  (pprint '(progn (setq a 1 b 2 c 3 d 4))))
+
+(PROGN (SETQ A 1
+             B 2
+             C 3 ..))
+
+(The symbol ".." is printed out to ensure that a reader error will occur
+if the output is later read.  A symbol different than "..." is used to
+indicate that a different kind of abbreviation has occurred.)
+
+*PRINT-PPRINT-DISPATCH*                                          [variable]
+
+When *PRINT-PRETTY* is not NIL, printing is controlled by the `pprint
+dispatch table' stored in the variable *PRINT-PPRINT-DISPATCH*.  The
+initial value of *PRINT-PPRINT-DISPATCH* is implementation dependent and
+causes traditional pretty printing of Lisp code.  The last section of this
+proposal explains how the contents of this table can be changed.
+
+
+The function WRITE accepts keyword arguments :PPRINT-DISPATCH,
+:RIGHT-MARGIN, :LINES, and :MISER-WIDTH corresponding to
+*PRINT-PPRINT-DISPATCH*, *PRINT-RIGHT-MARGIN*, *PRINT-LINES*, and
+*PRINT-MISER-WIDTH*.
+
+
+	     Dynamic Control of the Arrangement of Output
+
+The following functions and macros support precise control of what should
+be done when a piece of output is too large to fit in the space available.
+Three concepts underlie the way these operations work---`logical blocks',
+`conditional newlines', and `sections'.  Before proceeding further, it is
+important to define these terms.
+
+The first line of Figure 1 shows a schematic piece of output.  The
+characters in the output are represented by "-"s.  The positions of
+conditional newlines are indicated by digits.  The beginnings and ends of
+logical blocks are indicated by "<" and ">" respectively.
+
+The output as a whole is a logical block and the outermost section.  This
+section is indicated by the 0's on the second line of Figure 1.  Logical
+blocks nested within the output are specified by the macro
+PPRINT-LOGICAL-BLOCK.  Conditional newline positions are specified by calls
+on PPRINT-NEWLINE.  Each conditional newline defines two sections (one
+before it and one after it) and is associated with a third (the section
+immediately containing it).
+
+The section after a conditional newline consists of: all the output up to,
+but not including, (a) the next conditional newline immediately contained
+in the same logical block; or if (a) is not applicable, (b) the next
+newline that is at a lesser level of nesting in logical blocks; or if (b)
+is not applicable, (c) the end of the output.
+
+The section before a conditional newline consists of: all the output back
+to, but not including, (a) the previous conditional newline that is
+immediately contained in the same logical block; or if (a) is not
+applicable, (b) the beginning of the immediately containing logical block.
+The last four lines in Figure 1 indicate the sections before and after the
+four conditional newlines.
+
+The section immediately containing a conditional newline is the shortest
+section that contains the conditional newline in question.  In Figure 1,
+the first conditional newline is immediately contained in the section
+marked with 0's, the second and third conditional newlines are immediately
+contained in the section before the fourth conditional newline, and the
+fourth conditional newline is immediately contained in the section after
+the first conditional newline.
+
+
+                 <-1---<--<--2---3->--4-->->
+                 000000000000000000000000000
+                 11 111111111111111111111111
+                           22 222
+                              333 3333
+                        44444444444444 44444
+
+Figure 1: Example of logical blocks, conditional newlines, and sections.
+
+Whenever possible, the pretty printer displays the entire contents of a
+section on a single line.  However, if the section is too long to fit in
+the space available, line breaks are inserted at conditional newline
+positions within the section.
+
+
+PPRINT-NEWLINE kind &OPTIONAL (stream *STANDARD-OUTPUT*)    [Function]
+
+STREAM (which defaults to *STANDARD-OUTPUT*) follows the standard
+conventions for stream arguments to printing functions (i.e., NIL stands
+for *STANDARD-OUTPUT* and T stands for *TERMINAL-IO*).  The KIND argument
+specifies the style of conditional newline.  It must be one of :LINEAR,
+:FILL, :MISER, or :MANDATORY.  An error is signalled if any other value is
+supplied.  If STREAM is a pretty printing stream created by
+PPRINT-LOGICAL-BLOCK, a line break is inserted in the output when the
+appropriate condition below is satisfied.  Otherwise, PPRINT-NEWLINE has no
+effect.  The value NIL is always returned.
+
+If KIND is :LINEAR, it specifies a `linear-style' conditional newline.  A
+line break is inserted if and only if the immediately containing section
+cannot be printed on one line.  The effect of this is that line breaks are
+either inserted at every linear-style conditional newline in a logical
+block or at none of them.
+
+If KIND is :MISER, it specifies a `miser-style' conditional newline.  A
+line break is inserted if and only if the immediately containing section
+cannot be printed on one line and miser style is in effect in the
+immediately containing logical block.  The effect of this is that
+miser-style conditional newlines act like linear-style conditional
+newlines, but only when miser style is in effect.  Miser style is in effect
+for a logical block if and only if the starting position of the logical
+block is less than or equal to *PRINT-MISER-WIDTH* from the right margin.
+
+If KIND is :FILL, it specifies a `fill-style' conditional newline.  A line
+break is inserted if and only if either (a) the following section cannot be
+printed on the end of the current line, (b) the preceding section was not
+printed on a single line, or (c) the immediately containing section cannot
+be printed on one line and miser style is in effect in the immediately
+containing logical block.  If a logical block is broken up into a number of
+subsections by fill-style conditional newlines, the basic effect is that
+the logical block is printed with as many subsections as possible on each
+line.  However, if miser style is in effect, fill-style conditional
+newlines act like linear-style conditional newlines.
+
+If KIND is :MANDATORY, it specifies a `mandatory-style' conditional
+newline.  A line break is always inserted.  This implies that none of the
+containing sections can be printed on a single line and will therefore
+trigger the insertion of line breaks at linear-style conditional newlines
+in these sections.
+
+When a line break is inserted by any type of conditional newline, any
+blanks that immediately precede the conditional newline are omitted from
+the output and indentation is introduced at the beginning of the next line.
+By default, the indentation causes the following line to begin in the same
+horizontal position as the first character in the immediately containing
+logical block.  (The indentation can be changed via PPRINT-INDENT.)
+
+There are a variety of ways unconditional newlines can be introduced into
+the output (e.g., via TERPRI or by printing a string containing a newline
+character).  As with mandatory conditional newlines, this prevents any of
+the containing sections from being printed on one line.  In general, when
+an unconditional newline is encountered, it is printed out without
+suppression of the preceding blanks and without any indentation following
+it.  However, if a per-line prefix has been specified (see
+PPRINT-LOGICAL-BLOCK), this prefix will always be printed no matter how a
+newline originates.
+
+
+PPRINT-LOGICAL-BLOCK (stream-symbol list                     [Macro]
+                      &KEY :prefix :per-line-prefix :suffix)
+                     &BODY body
+
+This macro causes printing to be grouped into a logical block.  The value
+NIL is always returned.
+
+STREAM-SYMBOL must be a symbol.  If it is NIL, it is treated the same as
+if it were *STANDARD-OUTPUT*.  If it is T, it is treated the same as if
+it were *TERMINAL-IO*.  The run-time value of STREAM-SYMBOL must be a
+stream (or NIL standing for *STANDARD-OUTPUT* or T standing for *TERMINAL-IO*).
+The logical block is printed into this destination stream.
+
+The BODY can contain any arbitrary Lisp forms.  Within the BODY,
+STREAM-SYMBOL (or *STANDARD-OUTPUT* if STREAM-SYMBOL is NIL, or
+*TERMINAL-IO* if STREAM-SYMBOL is T) is bound to a `pretty printing' stream
+that supports decisions about the arrangement of output and then forwards
+the output to the destination stream.  All the standard printing functions
+(e.g., WRITE, PRINC, TERPRI) can be used to print output the pretty
+printing stream created by PPRINT-LOGICAL-BLOCK.  All and only the output
+sent to this pretty printing stream is treated as being in the logical
+block.
+
+PPRINT-LOGICAL-BLOCK and the pretty printing stream it creates have dynamic
+extent.  It is undefined what happens if output is attempted outside of
+this extent to the pretty printing stream created.  It is unspecified what
+happens if, within this extent, any output is sent directly to the
+underlying destination stream.
+
+The :SUFFIX, :PREFIX, and :PER-LINE-PREFIX must all be expressions that (at
+run time) evaluate to strings.  :SUFFIX (which defaults to the null string)
+specifies a suffix that is printed just after the logical block.  The
+:PREFIX and :PRE-LINE-PREFIX arguments are mutually exclusive.  If neither
+:PREFIX or :PER-LINE-PREFIX is specified, a :PREFIX of the null string is
+assumed.  :PREFIX specifies a prefix to be printed before the beginning of
+the logical block.  :PER-LINE-PREFIX specifies a prefix that is printed
+before the block and at the beginning of each new line in the block.  An
+error is signalled if :PREFIX and :PRE-LINE-PREFIX are both used or if the
+:SUFFIX, :PREFIX, or :PER-LINE-PREFIX do not evaluate to strings.
+
+LIST is interpreted as being a list that BODY is responsible for
+printing.  (See PPRINT-EXIT-IF-LIST-EXHAUSTED and PPRINT-POP.)  If
+LIST does not (at run time) evaluate to a list, it is printed using
+WRITE.  (This makes it easier to write printing functions that are
+robust in the face of malformed arguments.)  If *PRINT-CIRCLE* (and
+possibly *PRINT-SHARED*) is not NIL and LIST is a circular (or shared)
+reference to a cons, then an appropriate #n# marker is printed.  (This
+makes it easy to write printing functions that provide full support
+for circularity and sharing abbreviation.)  If *PRINT-LEVEL* is not
+NIL and the logical block is at a dynamic nesting depth of greater
+than *PRINT-LEVEL* in logical blocks, # is printed.  (This makes easy
+to write printing functions that provide full support for depth
+abbreviation.)
+
+If either of the three conditions above occurs, the indicated output is
+printed on STREAM-SYMBOL and the BODY is skipped along with the printing of
+the :PREFIX and :SUFFIX.  (If the BODY is not responsible for printing a
+list, then the first two tests above can be turned off by supplying NIL for
+the LIST argument.)
+
+In addition to the LIST argument of PPRINT-LOGICAL-BLOCK, the arguments of
+the standard printing functions such as WRITE, PRINT, PPRINT, PRINT1, and
+PPRINT, as well as the arguments of the standard FORMAT directives such as
+~A, ~S, (and ~W) are all checked (when necessary) for circularity and
+sharing.  However, such checking is not applied to the arguments of the
+functions WRITE-LINE, WRITE-STRING, and WRITE-CHAR or to the literal text
+output by FORMAT.  A consequence of this is that you must use one of the
+latter functions if you want to print some literal text in the output that
+is not supposed to be checked for circularity or sharing.  (See the
+examples below.)
+
+----------------------------------------
+
+Implementation note:  detection of circularity and sharing is supported by
+the pretty printer by in essence performing requested output twice.
+On the first pass, circularities and sharing are detected and the
+actual outputting of characters is suppressed.  On the second pass, the
+appropriate #n= and #n# markers are inserted and characters are output.
+
+A consequence of this two-pass approach to the detection of circularity and
+sharing is that the BODY of a PPRINT-LOGICAL-BLOCK must not perform any
+side-effects on the surrounding environment.  This includes not modifying
+any variables that are bound outside of its scope.  Obeying this
+restriction is facilitated by using PPRINT-POP, instead of an ordinary POP
+when traversing a list being printed by the BODY of a
+PPRINT-LOGICAL-BLOCK.)
+
+----------------------------------------
+
+
+PPRINT-EXIT-IF-LIST-EXHAUSTED                                       [Macro]  
+
+PPRINT-EXIT-IF-LIST-EXHAUSTED tests whether or not the LIST passed to
+PPRINT-LOGICAL-BLOCK has been exhausted (see PPRINT-POP).  If this list has
+been reduced to NIL, PPRINT-EXIT-IF-LIST-EXHAUSTED terminates the execution
+of the immediately containing PPRINT-LOGICAL-BLOCK except for the printing
+of the suffix.  Otherwise PPRINT-EXIT-IF-LIST-EXHAUSTED returns NIL.  An
+error message is issued if PPRINT-EXIT-IF-LIST-EXHAUSTED is used anywhere
+other than syntactically nested within a call on PPRINT-LOGICAL-BLOCK.  It
+is undefined what happens if PPRINT-POP is executed outside of the dynamic
+extent of this PPRINT-LOGICAL-BLOCK.
+
+
+PPRINT-POP                                                          [Macro]  
+
+PPRINT-POP pops elements one at a time off the LIST passed to
+PPRINT-LOGICAL-BLOCK obeying *PRINT-LENGTH*, *PRINT-CIRCLE*, and
+*PRINT-SHARED*.  An error message is issued if it is used anywhere
+other than syntactically nested within a call on PPRINT-LOGICAL-BLOCK.
+It is undefined what happens if PPRINT-POP is executed outside of the
+dynamic extent of this PPRINT-LOGICAL-BLOCK.
+
+Each time PPRINT-POP is called, it pops the next value off the LIST
+passed to PPRINT-LOGICAL-BLOCK and returns it.  However, before doing
+this, it performs three tests.  If the remaining list is not a list
+(i.e., a cons or NIL), ". " is printed followed by the remaining list.
+(This makes it easier to write printing functions that are robust in
+the face of malformed arguments.)  If *PRINT-LENGTH* is NIL and
+PPRINT-POP has already been called *PRINT-LENGTH* times within the
+immediately containing logical block, "..." is printed.  (This makes
+it easy to write printing functions that properly handle
+*PRINT-LENGTH*.)  If *PRINT-CIRCLE* (and possibly *PRINT-SHARED*) is
+not NIL, and the remaining list is a circular (or shared) reference,
+then ". " is printed followed by an appropriate #n# marker.  (This
+catches instances of cdr circularity and sharing in lists.)
+
+If either of the three conditions above occurs, the indicated output is
+printed on the pretty printing stream created by the immediately containing
+PPRINT-LOGICAL-BLOCK and the execution of the immediately containing
+PPRINT-LOGICAL-BLOCK is terminated except for the printing of the suffix.
+
+If PPRINT-LOGICAL-BLOCK is given a LIST argument of NIL---because it is not
+processing a list---PPRINT-POP can still be used to obtain support for
+*PRINT-LENGTH* (see the example function PPRINT-VECTOR below).  In this
+situation, the first and third tests above are disabled and
+PPRINT-POP always returns NIL.
+
+
+PPRINT-INDENT relative-to n &OPTIONAL (stream *STANDARD-OUTPUT*) [Function]
+
+PPRINT-INDENT specifies the indentation to use in a logical block.  STREAM
+(which defaults to *STANDARD-OUTPUT*) follows the standard conventions for
+stream arguments to printing functions.  N specifies the indentation in
+ems.  If RELATIVE-TO is :BLOCK, the indentation is set to the horizontal
+position of the first character in the block plus N ems.  If RELATIVE-TO is
+:CURRENT, the indentation is set to the current output position plus N ems.
+(For robustness in the face of variable-width fonts, it is advisable to use
+:CURRENT with an N of zero whenever possible.)
+
+N can be negative; however, the total indentation cannot be moved left of
+the beginning of the line or left of the end of the rightmost per-line
+prefix.  Changes in indentation caused by PPRINT-INDENT do not take
+effect until after the next line break.  In addition, in miser mode all
+calls on PPRINT-INDENT are ignored, forcing the lines corresponding to the
+logical block to line up under the first character in the block.
+
+An error is signalled if a value other than :BLOCK or :CURRENT is supplied
+for RELATIVE-TO.  If STREAM is a pretty printing stream created by
+PPRINT-LOGICAL-BLOCK, PPRINT-INDENT sets the indentation in the innermost
+dynamically enclosing logical block.  Otherwise, PPRINT-INDENT has no
+effect.  The value NIL is always returned.
+
+
+PPRINT-TAB kind colnum colinc &OPTIONAL (stream *STANDARD-OUTPUT*) [function]
+
+PPRINT-TAB specifies tabbing as performed by the standard FORMAT directive
+~T.  STREAM (which defaults to *STANDARD-OUTPUT*) follows the standard
+conventions for stream arguments to printing functions.  The arguments
+COLNUM and COLINC correspond to the two parameters to ~T and are in terms
+of ems.  The KIND argument specifies the style of tabbing.  It must be one
+of :LINE (tab as by ~T) :SECTION (tab as by ~T, but measuring horizontal
+positions relative to the start of the dynamically enclosing section),
+:LINE-RELATIVE (tab as by ~@T), or :SECTION-RELATIVE (tab as by ~@T, but
+measuring horizontal positions relative to the start of the dynamically
+enclosing section).  An error is signalled if any other value is supplied
+for KIND.  If STREAM is a pretty printing stream created by
+PPRINT-LOGICAL-BLOCK, tabbing is performed.  Otherwise, PPRINT-TAB has no
+effect.  The value NIL is always returned.
+
+
+PPRINT-FILL STREAM LIST &OPTIONAL (COLON? T) ATSIGN?                 [function]
+PPRINT-LINEAR STREAM LIST &OPTIONAL (COLON? T) ATSIGN?               [function]
+PPRINT-TABULAR STREAM LIST &OPTIONAL (COLON? T) ATSIGN? (TABSIZE 16) [function]
+
+These three functions specify particular ways of pretty printing lists.
+STREAM follows the standard conventions for stream arguments to printing
+functions.  Each function prints parentheses around the output if and only
+if COLON? (default T) is not NIL.  Each function ignores its ATSIGN?
+argument and returns NIL.  (These two arguments are included in this way so
+that these functions can be used via ~/.../ and as SET-PPRINT-DISPATCH
+functions as well as directly.)  Each function handles abbreviation and the
+detection of circularity and sharing correctly, and uses WRITE to print
+LIST when given a non-list argument.
+
+The function PPRINT-LINEAR prints a list either all on one line, or with
+each element on a separate line.  The function PPRINT-FILL prints a list
+with as many elements as possible on each line.  The function
+PPRINT-TABULAR is the same as PPRINT-FILL except that it prints the
+elements so that they line up in columns.  This function takes an
+additional argument TABSIZE (default 16) that specifies the column
+spacing in ems.
+
+---
+
+As an example of the interaction of logical blocks, conditional newlines,
+and indentation, consider the function SIMPLE-PPRINT-DEFUN below.  This
+function prints out lists whose cars are DEFUN in the standard way assuming
+that the list has exactly length 4.
+
+(defun simple-pprint-defun (*standard-output* list)
+  (pprint-logical-block (*standard-output* list :prefix "(" :suffix ")")
+    (write (first list))
+    (write-char #\space)
+    (pprint-newline :miser)
+    (pprint-indent :current 0)
+    (write (second list))
+    (write-char #\space)
+    (pprint-newline :fill)
+    (write (third list))
+    (pprint-indent :block 1)
+    (write-char #\space)
+    (pprint-newline :linear)
+    (write (fourth list))))
+
+Suppose that one evaluates the following:
+
+(simple-pprint-defun *standard-output* '(defun prod (x y) (* x y)))
+
+If the line width available is greater than or equal to 26, then all of the
+output appears on one line.  If the line width available is reduced to 25,
+a line break is inserted at the linear-style conditional newline before the
+expression (* X Y), producing the output shown.  The (PPRINT-INDENT :BLOCK 1)
+causes (* X Y) to be printed at a relative indentation of 1 in the logical block.
+
+(DEFUN PROD (X Y) 
+  (* X Y))
+
+If the line width available is 15, a line break is also inserted at the
+fill style conditional newline before the argument list.  The call on
+(PPRINT-INDENT :CURRENT 0) causes the argument list to line up under the
+function name.
+
+(DEFUN PROD
+       (X Y)
+  (* X Y))
+
+If *PRINT-MISER-WIDTH* were greater than or equal to 14, the example output
+above would have been as follows, because all indentation changes are
+ignored in miser mode and line breaks are inserted at miser-style
+conditional newlines.
+
+(DEFUN
+ PROD
+ (X Y)
+ (* X Y))
+
+---
+
+As an example of a per-line prefix, consider that evaluating the following
+produces the output shown with a line width of 20 and *PRINT-MISER-WIDTH*
+of NIL.
+
+(pprint-logical-block (*standard-output* nil :per-line-prefix ";;; ")
+  (simple-pprint-defun *standard-output* '(defun prod (x y) (* x y))))
+
+;;; (DEFUN PROD
+;;;        (X Y)
+;;;   (* X Y))
+
+---
+
+As a more complex (and realistic) example, consider the function PPRINT-LET
+below.  This specifies how to print a LET in the standard style.  It is more
+complex than the example above, because it has to deal with nested structure.
+Also, unlike the example above it contains complete code to readably print any
+possible list that begins with the symbol LET.  The outermost
+PPRINT-LOGICAL-BLOCK handles the printing of the input list as a whole and
+specifies that parentheses should be printed in the output.  The second
+PPRINT-LOGICAL-BLOCK handles the list of binding pairs.  Each pair in the list
+is itself printed by the innermost PPRINT-LOGICAL-BLOCK.  (A LOOP is used
+instead of merely decomposing the pair into two elements so that readable
+output will be produced no matter whether the list corresponding to the pair
+has one element, two elements, or (being malformed) has more than two
+elements.)   A space and a fill-style conditional newline are placed after
+each pair except the last.  The loop at the end of the topmost
+PPRINT-LOGICAL-BLOCK prints out the forms in the body of the LET separated by
+spaces and linear-style conditional newlines.
+
+(defun pprint-let (*standard-output* list)
+  (pprint-logical-block (nil list :prefix "(" :suffix ")")
+    (write (pprint-pop))
+    (pprint-exit-if-list-exhausted)
+    (write-char #\space)
+    (pprint-logical-block (nil (pprint-pop) :prefix "(" :suffix ")")
+      (pprint-exit-if-list-exhausted)
+      (loop (pprint-logical-block (nil (pprint-pop) :prefix "(" :suffix ")")
+	      (pprint-exit-if-list-exhausted)
+	      (loop (write (pprint-pop))
+		    (pprint-exit-if-list-exhausted)
+		    (write-char #\space)
+		    (pprint-newline :linear)))
+	    (pprint-exit-if-list-exhausted)
+	    (write-char #\space)
+	    (pprint-newline :fill)))
+    (pprint-indent :block 1)
+    (loop (pprint-exit-if-list-exhausted)
+	  (write-char #\space)
+	  (pprint-newline :linear)
+	  (write (pprint-pop)))))
+
+Suppose that one evaluates the following with *PRINT-LEVEL* 4, and
+*PRINT-CIRCLE* T.
+
+(pprint-let *standard-output*
+	    '#1=(let (x (*print-length* (f (g 3))) 
+		      (z . 2) (k (car y)))
+		  (setq x (sqrt z)) #1#))
+
+If the line length is greater than or equal to 77, the output produced
+appears on one line.  However, if the line length is 76, line breaks are
+inserted at the linear-style conditional newlines separating the forms in
+the body and the output below is produced.  Note that, the degenerate
+binding pair X is printed readably even though it fails to be a list; a
+depth abbreviation marker is printed in place of (G 3); the binding pair
+(Z . 2) is printed readably even though it is not a proper list; and
+appropriate circularity markers are printed.
+
+#1=(LET (X (*PRINT-LENGTH* (F #)) (Z . 2) (K (CAR Y))) 
+     (SETQ X (SQRT Z))
+     #1#)
+
+If the line length is reduced to 35, a line break is inserted at one of the
+fill-style conditional newlines separating the binding pairs.
+
+#1=(LET (X (*PRINT-PRETTY* (F #))
+         (Z . 2) (K (CAR Y)))
+     (SETQ X (SQRT Z))
+     #1#)
+
+Suppose that the line length is further reduced to 22 and *PRINT-LENGTH* is
+set to 3. In this situation, line breaks are inserted after both the first
+and second binding pairs.  In addition, the second binding pair is itself
+broken across two lines.  Clause (b) of the description of fill-style
+conditional newlines prevents the binding pair (Z . 2) from being printed
+at the end of the third line.  Note that the length abbreviation hides the
+circularity from view and therefore the printing of circularity markers
+disappears.
+
+(LET (X
+      (*PRINT-LENGTH*
+       (F #))
+      (Z . 2) ...)
+  (SETQ X (SQRT Z))
+  ...)
+
+---
+
+The function PPRINT-TABULAR could be defined as follows.
+
+(defun pprint-tabular (s list &optional (colon? T) atsign? (tabsize nil))
+  (declare (ignore atsign?))
+  (when (null tabsize) (setq tabsize 16))
+  (pprint-logical-block (s list :prefix (if colon? "(" "")
+			        :suffix (if colon? ")" ""))
+    (pprint-exit-if-list-exhausted)
+    (loop (write (pprint-pop) :stream s)
+	  (pprint-exit-if-list-exhausted)
+	  (write-char #\space s)
+	  (pprint-tab :section-relative 0 tabsize s)
+	  (pprint-newline :fill s))))
+
+Evaluating the following with a line length of 25 produces the output shown.
+
+(princ "Roads ") 
+(pprint-tabular *standard-output* '(elm main maple center) nil nil 8)
+
+Roads ELM     MAIN
+      MAPLE   CENTER
+
+---
+    
+The function below prints a vector using #(...) notation.
+     
+(defun pprint-vector (*standard-output* v)
+  (pprint-logical-block (nil nil :prefix "#(" :suffix ")")
+    (let ((end (length v)) (i 0))
+      (when (plusp end)
+	(loop (pprint-pop)
+	      (write (aref v i))
+	      (if (= (incf i) end) (return nil))
+	      (write-char #\space)
+	      (pprint-newline :fill))))))
+
+Evaluating the following with a line length of 15 produces the output shown.
+
+(pprint-vector *standard-output* '#(12 34 567 8 9012 34 567 89 0 1 23))
+
+#(12 34 567 8 
+  9012 34 567 
+  89 0 1 23)
+
+                     Format Directive Interface
+
+The primary interface to operations for dynamically determining the
+arrangement of output is provided through the functions above.  However, an
+additional interface is provided via a set of new format directives.
+This is done, because as shown by the examples in this section and the
+next, FORMAT strings are typically a much more compact way to specify
+pretty printing.  In addition, without such an interface, one would have to
+abandon the use of FORMAT when interacting with the pretty printer.
+
+~W                                                        [format directive]
+
+WRITE -- An arg, any Lisp object, is printed obeying every printer control
+variable (as by WRITE).  In addition, ~W interacts correctly with depth
+abbreviation, by not resetting the depth counter to zero.  ~W does not
+accept parameters.  If given the colon modifier, ~W binds *PRINT-PRETTY* to
+T.  If given the atsign modifier, ~W binds *PRINT-LEVEL* and *PRINT-LENGTH*
+to NIL.
+
+~W provides automatic support for the detection of circularity and
+sharing.  If *PRINT-CIRCLE* (and possibly *PRINT-SHARED*) is not NIL
+and ~W is applied to an argument that is a circular (or shared)
+reference, an appropriate #n# marker is inserted in the output instead
+of printing the argument.
+
+~_                                                        [format directive]
+
+CONDITIONAL-NEWLINE -- Without any modifiers, ~_ is the same as
+(PPRINT-NEWLINE :LINEAR).  ~@_ is the same as (PPRINT-NEWLINE :MISER).
+~:_ is the same as (PPRINT-NEWLINE :FILL).  ~:@_ is the same as
+(PPRINT-NEWLINE :MANDATORY).
+
+~<...~:>                                                  [format directive]
+
+LOGICAL BLOCK -- If ~:> is used to terminate a ~<...~>, the directive
+is equivalent to a call on PPRINT-LOGICAL-BLOCK.  The FORMAT argument
+corresponding to the ~<...~:> directive is treated in the same way as
+the LIST argument to PPRINT-LOGICAL-BLOCK, thereby providing automatic
+support for non-list arguments and the detection of circularity,
+sharing, and depth abbreviation.  The portion of the FORMAT control
+string nested within the ~<...~:> specifies the :PREFIX (or
+:PER-LINE-PREFIX), :suffix}, and body of the PPRINT-LOGICAL-BLOCK.
+
+The FORMAT string portion enclosed by ~<...~:> can be divided into
+segments ~<prefix~;body~;suffix~:> by ~; directives.  If the first
+section is terminated by ~@;, it specifies a per-line prefix rather
+than a simple prefix.  The prefix and suffix cannot contain FORMAT
+directives.  An error is signalled if either the prefix or suffix
+fails to be a constant string or if the enclosed portion is divided
+into more than three segments.
+
+If the enclosed portion is divided into only two segments, the suffix
+defaults to the null string.  If the enclosed portion consists of only
+a single segment, both the prefix and the suffix default to the null
+string.  If the colon modifier is used (i.e., ~:<...~:>), the prefix
+and suffix default to "(" and ")" (respectively) instead of the null
+string.
+
+The body segment can be any arbitrary FORMAT control string.  This
+FORMAT control string is applied to the elements of the list
+corresponding to the ~<...~:> directive as a whole.  Elements are
+extracted from this list using PPRINT-POP, thereby providing automatic
+support for malformed lists, and the detection of circularity,
+sharing, and length abbreviation.  Within the body segment, ~^ acts
+like PPRINT-EXIT-IF-LIST-EXHAUSTED.
+
+~<...~:> supports a feature not supported by PPRINT-LOGICAL-BLOCK.  If
+~:@> is used to terminate the directive (i.e., ~<...~:@>), then a
+fill-style conditional newline is automatically inserted after each
+group of blanks immediately contained in the body (except for blanks
+after a ~<newline> directive).  This makes it easy to achieve the
+equivalent of paragraph filling.
+
+If the atsign modifier is used with ~<...~:>, the entire remaining
+argument list is passed to the directive as its argument.  All of the
+remaining arguments are always consumed by ~@<...~:>, even if they are
+not all used by the FORMAT string nested in the directive.  Other than
+the difference in its argument, ~@<...~:> is exactly the same as
+~<...~:> except that " . #n#" is printed if circularity or sharing has
+to be indicated for its argument as a whole.
+
+To a considerable extent, the basic form of the directive ~<...~> is
+incompatible with the dynamic control of the arrangement of output by
+~W, ~_, ~<...~:>, ~I, and ~:T.  As a result, an error is signalled if
+any of these directives is nested within ~<...~>.  Beyond this, an
+error is also signalled if the ~<...~:;...~> form of ~<...~> is used
+in the same FORMAT string with ~W, ~_, ~<...~:>, ~I, or ~:T.
+
+~I                                                        [format directive]
+
+INDENT -- ~nI is the same as (PPRINT-INDENT :BLOCK N).
+~n:I is the same as (PPRINT-INDENT :CURRENT N).  In both cases, N defaults
+to zero, if it is omitted.
+
+~:T                                                       [format directive]
+
+TABULATE -- If the colon modifier is used with the ~T directive, the
+tabbing computation is done relative to the horizontal position where the
+section immediately containing the directive begins, rather than with
+respect to a horizontal position of zero.  The numerical parameters are
+both interpreted as being in units of ems and both default to 1.
+~n,m:T is the same as (PPRINT-TAB :SECTION N M).
+~n,m:@T is the same as (PPRINT-TAB :SECTION-RELATIVE N M).
+
+~/name/                                                   [format directive]
+
+CALL FUNCTION -- User defined functions can be called from within a FORMAT
+string by using the directive ~/name/.  The colon modifier, the atsign
+modifier, and arbitrarily many parameters can be specified with the ~/name/
+directive.  NAME can be any arbitrary string that does not contain a "/".
+All of the characters in NAME are treated as if they were upper case.  If
+NAME contains a ":" or "::", then everything up to but not including the
+first ":" or "::" is taken to be a string that names a package.  Everything
+after the first ":" or "::" (if any) is taken to be a string that names a
+symbol.  The function corresponding to a ~/name/ directive is obtained by
+looking up the symbol that has the indicated name in the indicated package.
+If NAME does not contain a ":" or "::", then the whole name string is
+looked up in the USER package.
+
+When a ~/name/ directive is encountered, the indicated function is called
+with four or more arguments.  The first four arguments are: the output
+stream, the FORMAT argument corresponding to the directive, the value T if
+the colon modifier was used (NIL otherwise), and the value T if the atsign
+modifier was used (NIL otherwise).  The remaining arguments consist of any
+parameters specified with the directive.  The function should print the
+argument appropriately.  Any values returned by the function are ignored.
+
+The three functions PPRINT-LINEAR, PPRINT-FILL, and PPRINT-TABULAR are
+specifically designed so that they can be called by ~/.../ (i.e.,
+~/PPRINT-LINEAR/, ~/PPRINT-FILL/, and ~/PPRINT-TABULAR/).  In particular
+they take colon and atsign arguments.
+
+---
+
+As examples of the convenience of specifying pretty printing with FORMAT
+strings, consider that the first two functions used as examples in the last
+section can be compactly defined as follows.  The function PPRINT-VECTOR
+cannot be defined using FORMAT, because the data structure it traverses is
+not a list.  The function PPRINT-TABULAR is inconvenient to define using
+FORMAT, because of the need to pass its TABSIZE argument through to a ~:T
+directive nested within an iteration over a list.
+
+(defun simple-pprint-defun (*standard-output* list)
+  (format T "~:<~W ~@_~:I~W ~:_~W~1I ~_~W~:>" list))
+
+(defun pprint-let (*standard-output* list)
+  (format T "~:<~W~^ ~:<~@{~:<~@{~W~^ ~_~}~:>~^ ~:_~}~:>~1I~@{~^ ~_~W~}~:>" list)) 
+
+		   Compiling Format Control Strings
+
+The control strings used by FORMAT are essentially programs that perform
+printing.  The macro FORMATTER provides the efficiency of using a compiled
+function for printing without losing the compactness of FORMAT control
+strings.
+
+FORMATTER control-string                                           [macro]
+
+CONTROL-STRING must be a literal string.  An error is signalled if
+CONTROL-STRING is not a valid FORMAT control string.  The macro FORMATTER
+expands into an expression of the form (FUNCTION (LAMBDA (STREAM &REST
+ARGS) ...))  that does the printing specified by CONTROL-STRING.  The
+LAMBDA created accepts an output stream as its first argument and zero or
+more data values as its remaining arguments.  The value returned by the
+LAMBDA is the tail (if any) of the data values that are not printed out by
+CONTROL-STRING.  (E.g., if the CONTROL-STRING is "~A~A" the CDDR (if any)
+of the data values is returned.)
+
+For instance: (formatter "~%~2@{~S, ~}") is equivalent to
+
+#'(lambda (stream &rest args)
+    (terpri stream)
+    (dotimes (n 2)
+      (if (null args) (return nil))
+      (prin1 (pop args) stream)
+      (write-string ", " stream))
+    args)
+
+In support of the above, FORMAT is extended so that it accepts functions as
+its second argument as well as strings.  When a function is provided, it
+must be a function of the form created by FORMATTER.  The function is called
+with the appropriate output stream as its first argument and the data
+arguments to FORMAT as its remaining arguments.  The function should
+perform whatever output is necessary and return the unused tail of the
+arguments (if any).  The directives ~? and ~{~} with no body are also
+extended so that they accept functions as well as control strings.
+Every other standard function that takes a FORMAT string as an argument
+(e.g., ERROR and WARN) are also extended so that they can accept functions
+of the form above instead.
+
+			Pretty Print Dispatch Tables
+
+When *PRINT-PRETTY* is not NIL, the pprint dispatch table in the variable
+*PRINT-PPRINT-DISPATCH* controls how objects are printed.  The information
+in this table takes precedence over all other mechanisms for specifying how
+to print objects.  In particular, it overrides user-defined PRINT-OBJECT
+methods and print functions for structures.  However, if there is no
+specification for how to pretty print a particular kind of object, it is then
+printed using the standard mechanisms as if *PRINT-PRETTY* were NIL.
+
+Pprint dispatch tables are mappings from keys to pairs of values.  The keys
+are type specifiers.  The values are functions and numerical priorities.
+Basic insertion and retrieval is done based on the keys with the equality
+of keys being tested by EQUAL.  The function to use when pretty printing an
+object is chosen by finding the highest priority function from
+*PRINT-PPRINT-DISPATCH* that is associated with a type specifier that
+matches the object.
+
+
+COPY-PPRINT-DISPATCH &optional (table *PRINT-PPRINT-DISPATCH*)    [function]
+
+A copy is made of TABLE, which defaults to the current pprint dispatch
+table.  If TABLE is NIL, a copy is returned of the initial value of
+*PRINT-PPRINT-DISPATCH*.
+
+
+PPRINT-DISPATCH object &optional (table *PRINT-PPRINT-DISPATCH*)   [function] 
+
+This retrieves the highest priority function from a pprint table that is
+associated with a type specifier in the table that matches OBJECT.  The
+function is chosen by finding all the type specifiers in TABLE that match
+the object and selecting the highest priority function associated with any
+of these type specifiers.  If there is more than one highest priority
+function, an arbitrary choice is made.  If no type specifiers match the
+object, a function is returned that prints object with *PRINT-PRETTY* bound
+to NIL.
+
+As a second return value, PPRINT-DISPATCH returns a flag that is T if a
+matching type specifier was found in TABLE and NIL if not.
+
+TABLE (which defaults to *PRINT-PPRINT-DISPATCH*) must be a pprint dispatch
+table.  TABLE can be NIL, in which case retrieval is done in the initial
+value of *PRINT-PPRINT-DISPATCH*.
+
+When *PRINT-PRETTY* is T, (WRITE OBJECT :STREAM S) is equivalent to
+(FUNCALL (PPRINT-DISPATCH OBJECT) S OBJECT).
+
+
+SET-PPRINT-DISPATCH type-specifier function                        [function]
+                    &optional (priority 0) (table *PRINT-PPRINT-DISPATCH*)
+
+This puts an entry into a pprint dispatch table and returns NIL.
+TYPE-SPECIFIER must be a valid type specifier and is the key of the entry.
+The first action of SET-PPRINT-DISPATCH is to remove any pre-existing entry
+associated with TYPE-SPECIFIER.  This guarantees that there will never be
+two entries associated with the same type specifier in a given pprint
+dispatch table.  Equality of type specifiers is tested by EQUAL.
+
+Two values are associated with each type specifier in a pprint dispatch
+table: a function and a priority.  FUNCTION must accept two arguments: the
+stream to send output to and the object to be printed.  FUNCTION should
+pretty print the object on the stream.  FUNCTION can assume that object
+satisfies TYPE-SPECIFIER.  Function must obey *PRINT-READABLY* (see issue
+DATA-IO).  Any values returned by FUNCTION are ignored.
+
+PRIORITY (which defaults to 0) must be a non-complex number.  This
+number is used as a priority to resolve conflicts when an object
+matches more than one entry.  An error is signalled if priority fails
+to be a non-complex number.
+
+TABLE (which defaults to *PRINT-PPRINT-DISPATCH*) must be a pprint dispatch
+table.  The specified entry is placed in this table.
+
+It is permissible for FUNCTION to be NIL.  In this situation, there will be
+no TYPE-SPECIFIER entry in TABLE after SET-PPRINT-DISPATCH is evaluated.
+
+To facilitate the use of pprint dispatch tables for controlling the pretty
+printing of Lisp code, the TYPE-SPECIFIER argument of the function
+SET-PPRINT-DISPATCH is allowed to contain constructs of the form 
+
+           (CONS car-type cdr-type)
+
+This signifies that the corresponding object must be a cons cell whose car
+matches the type specifier CAR-TYPE and whose cdr matches the type specifier
+CDR-TYPE.  The CDR-TYPE can be omitted in which case it defaults to T.
+
+
+The initial value of *PRINT-PPRINT-DISPATCH* is implementation dependent.
+However, the initial entries all use a special class of priorities that
+have the property that they are less than every priority that can be
+specified using SET-PPRINT-DISPATCH.  The benefit of this is that it
+guarantees that any pretty printing functions users specify will override
+everything in the initial value of *PRINT-PPRINT-DISPATCH*.
+
+----------------------------------------------------------------------
+
+Implementation note:  The restriction above is very useful to users
+without actually limiting what Common Lisp implementors can do.  It is
+possible for implementors to set up any kind of pretty printing they
+desire using the range of priorities available to them.
+
+----------------------------------------------------------------------
+
+
+Consider the following examples.  The first form restores
+*PRINT-PPRINT-DISPATCH* to its initial value.  The next two forms then set
+up a special way to pretty print ratios.  Note that the more specific type
+specifier has to be associated with a higher priority.
+
+(setq *print-pprint-dispatch* (copy-pprint-dispatch nil))
+
+(set-pprint-dispatch 'ratio
+  #'(lambda (s obj)
+      (format s "#.(/ ~W ~W)" (numerator obj) (denominator obj))))
+
+(set-pprint-dispatch '(and ratio (satisfies minusp))
+  #'(lambda (s obj)
+      (format s "#.(- (/ ~W ~W))" (- (numerator obj)) (denominator obj)))
+  5)
+
+(pprint '(1/3 -2/3)) prints: (#.(/ 1 3) #.(- (/ 2 3)))
+
+The following two forms illustrate the definition of pretty printing
+functions for types of Lisp code.  The first form illustrates how to
+specify the traditional method for printing quoted objects using "'"
+syntax.  Note the care taken to ensure that data lists that happen to begin
+with QUOTE will be printed readably.  The second form specifies that lists
+beginning with the symbol MY-LET should print the same way that lists
+beginning with LET print when the initial pprint dispatch table is in effect.
+
+(set-pprint-dispatch '(cons (member quote)) () 
+  #'(lambda (s list)
+      (if (and (consp (cdr list)) (null (cddr list)))
+	  (funcall (formatter "'~W") s (cadr list))
+	  (pprint-fill s list)))))
+
+(set-pprint-dispatch '(cons (member my-let)) (pprint-dispatch '(let) nil))
+
+The next example specifies a default method for printing lists that do not
+correspond to function calls.  Note that, as shown in the definition of
+PPRINT-TABULAR above, PPRINT-LINEAR, PPRINT-FILL, and PPRINT-TABULAR are
+all defined with optional COLON? and ATSIGN? arguments so that they can be
+used as pprint dispatch functions as well as ~/.../ functions.
+
+(set-pprint-dispatch '(cons (not (and symbol (satisfies fboundp))))
+                     #'pprint-fill -5)
+
+with a line length of 9, (pprint '(0 b c d e f g h i j k)) prints: 
+(0 b c d
+ e f g h
+ i j k)
+
+This final example shows how to define a pretty printing function for a
+user defined data structure.
+
+(defstruct family mom kids)
+
+(set-pprint-dispatch 'family
+  #'(lambda (s f)
+      (funcall (formatter "~@<#<~;~W and ~2I~_~/pprint-fill/~;>~:>")
+	       s (family-mom f) (family-kids f))))
+
+The pretty printing function for the structure FAMILY specifies how to
+adjust the layout of the output so that it can fit aesthetically into
+a variety of line widths.  In addition, it obeys the printer control
+variables *PRINT-LEVEL*, *PRINT-LENGTH*, *PRINT-LINES*,
+*PRINT-CIRCLE*, *PRINT-SHARED* and *PRINT-ESCAPE*, and can tolerate
+several different kinds of malformity in the data structure.  The
+output below shows what is printed out with a right margin of 25,
+*PRINT-PRETTY* T, *PRINT-ESCAPE* NIL, and a malformed KIDS list.
+
+(write (list 'principal-family
+             (make-family :mom "Lucy"
+                          :kids '("Mark" "Bob" . "Dan")))
+       :right-margin 25 :pretty T :escape nil :miser-width nil)
+
+(PRINCIPAL-FAMILY
+ #<Lucy and
+     Mark Bob . Dan>)
+ 
+Note that a pretty printing function for a structure is different from the
+structure's print function.  While print functions are permanently
+associated with a structure, pretty printing functions are stored in pprint
+dispatch tables and can be rapidly changed to reflect different printing
+needs.  If there is no pretty printing function for a structure in the
+current print dispatch table, the print function (if any) is used instead.
+
+;------------------------------------------------------------------------
+
+;Copyright 1989 by the Massachusetts Institute of Technology, Cambridge, 
+;Massachusetts.
+
+;Permission to use, copy, modify, and distribute this software and its
+;documentation for any purpose and without fee is hereby granted,
+;provided that this copyright and permission notice appear in all
+;copies and supporting documentation, and that the name of M.I.T. not
+;be used in advertising or publicity pertaining to distribution of the
+;software without specific, written prior permission. M.I.T. makes no
+;representations about the suitability of this software for any
+;purpose.  It is provided "as is" without express or implied warranty.
+
+;    M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+;    ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+;    M.I.T. BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+;    ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+;    WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+;    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+;    SOFTWARE.
+
+;------------------------------------------------------------------------

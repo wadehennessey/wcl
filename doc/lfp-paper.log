@@ -1,0 +1,225 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2001.8.23)  11 OCT 2002 21:35
+**lfp-paper.tex
+(lfp-paper.tex
+LaTeX2e <1999/12/01> patch level 1
+Babel <v3.6Z> and hyphenation patterns for american, french, german, ngerman, i
+talian, portuges, russian, spanish, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/latex209.def
+File: latex209.def 1998/05/13 v0.52 Standard LaTeX file
+
+
+          Entering LaTeX 2.09 COMPATIBILITY MODE
+ *************************************************************
+    !!WARNING!!    !!WARNING!!    !!WARNING!!    !!WARNING!!   
+ 
+ This mode attempts to provide an emulation of the LaTeX 2.09
+ author environment so that OLD documents can be successfully
+ processed. It should NOT be used for NEW documents!
+ 
+ New documents should use Standard LaTeX conventions and start
+ with the \documentclass command.
+ 
+ Compatibility mode is UNLIKELY TO WORK with LaTeX 2.09 style
+ files that change any internal macros, especially not with
+ those that change the FONT SELECTION or OUTPUT ROUTINES.
+ 
+ Therefore such style files MUST BE UPDATED to use
+          Current Standard LaTeX: LaTeX2e.
+ If you suspect that you may be using such a style file, which
+ is probably very, very old by now, then you should attempt to
+ get it updated by sending a copy of this error message to the
+ author of that file.
+ *************************************************************
+
+\footheight=\dimen102
+\@maxsep=\dimen103
+\@dblmaxsep=\dimen104
+\@cla=\count79
+\@clb=\count80
+\mscount=\count81
+(/usr/share/texmf/tex/latex/base/tracefnt.sty
+Package: tracefnt 1997/05/29 v3.0j Standard LaTeX package (font tracing)
+\tracingfonts=\count82
+LaTeX Info: Redefining \selectfont on input line 96.
+)
+\symbold=\mathgroup4
+\symsans=\mathgroup5
+\symtypewriter=\mathgroup6
+\symitalic=\mathgroup7
+\symsmallcaps=\mathgroup8
+\symslanted=\mathgroup9
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 288.
+LaTeX Font Info:    Redeclaring math alphabet \mathsf on input line 289.
+LaTeX Font Info:    Redeclaring math alphabet \mathtt on input line 290.
+LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 296.
+LaTeX Info: Redefining \em on input line 306.
+
+(/usr/share/texmf/tex/latex/base/latexsym.sty
+Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
+\symlasy=\mathgroup10
+LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
+(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 42.
+)
+LaTeX Font Info:    Redeclaring math delimiter \lgroup on input line 370.
+LaTeX Font Info:    Redeclaring math delimiter \rgroup on input line 372.
+LaTeX Font Info:    Redeclaring math delimiter \bracevert on input line 374.
+
+(/usr/share/texmf/tex/latex/config/latex209.cfg)
+(/usr/share/texmf/tex/latex/tools/rawfonts.sty
+Package: rawfonts 1994/05/08 Low-level LaTeX 2.09 font compatibility
+
+(/usr/share/texmf/tex/latex/tools/somedefs.sty
+Package: somedefs 1994/06/01 Toolkit for optional definitions
+)
+LaTeX Font Info:    Try loading font information for U+lasy on input line 44.
+
+(/usr/share/texmf/tex/latex/base/ulasy.fd
+File: ulasy.fd 1998/08/17 v2.2eLaTeX symbol font definitions
+)))
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 1999/09/10 v1.4a Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 1999/09/10 v1.4a Standard LaTeX file (size option)
+)
+\c@part=\count83
+\c@section=\count84
+\c@subsection=\count85
+\c@subsubsection=\count86
+\c@paragraph=\count87
+\c@subparagraph=\count88
+\c@figure=\count89
+\c@table=\count90
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+Compatibility mode: definition of \rm ignored.
+Compatibility mode: definition of \sf ignored.
+Compatibility mode: definition of \tt ignored.
+Compatibility mode: definition of \bf ignored.
+Compatibility mode: definition of \it ignored.
+Compatibility mode: definition of \sl ignored.
+Compatibility mode: definition of \sc ignored.
+LaTeX Info: Redefining \cal on input line 501.
+LaTeX Info: Redefining \mit on input line 502.
+\bibindent=\dimen105
+)
+(/usr/share/texmf/tex/plain/dvips/epsf.tex
+This is `epsf.tex' v2.7k <10 July 1997>
+\epsffilein=\read1
+\epsfframemargin=\dimen106
+\epsfframethickness=\dimen107
+\epsfrsize=\dimen108
+\epsftmp=\dimen109
+\epsftsize=\dimen110
+\epsfxsize=\dimen111
+\epsfysize=\dimen112
+\pspoints=\dimen113
+\epsfnoopenhelp=\toks14
+) (lfp-paper.aux)
+\openout1 = `lfp-paper.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+
+
+LaTeX Warning: Citation `gdb' on page 1 undefined on input line 47.
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 52.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 52.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 52.
+[1
+
+
+]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 146.
+
+
+LaTeX Warning: Citation `gc1' on page 2 undefined on input line 146.
+
+[2] [3]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 349.
+
+ (/usr/share/texmf/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 349.
+
+
+LaTeX Warning: Citation `gcc' on page 4 undefined on input line 360.
+
+
+LaTeX Warning: Citation `pcl' on page 4 undefined on input line 375.
+
+
+LaTeX Warning: Citation `cltl2' on page 4 undefined on input line 389.
+
+
+LaTeX Warning: Citation `emacs' on page 4 undefined on input line 412.
+
+[4]
+! Could not open file solenoid.ps, ignoring it.
+\epsfgetbb ...Could not open file #1, ignoring it}
+                                                  \else {\chardef \other =12...
+l.466   \epsfbox{solenoid.ps}
+                             
+? 
+
+LaTeX Warning: Float too large for page by 23.93694pt on input line 469.
+
+[5]
+
+LaTeX Warning: Citation `vmacs' on page 6 undefined on input line 548.
+
+
+LaTeX Warning: Citation `akcl' on page 6 undefined on input line 561.
+
+
+LaTeX Warning: Citation `kcl' on page 6 undefined on input line 561.
+
+
+LaTeX Warning: Citation `lucid' on page 6 undefined on input line 567.
+
+[6]
+
+LaTeX Warning: Citation `s2c' on page 7 undefined on input line 715.
+
+[7] [8]
+
+LaTeX Warning: Citation `cmu-lisp' on page 9 undefined on input line 795.
+
+
+LaTeX Warning: Citation `gc2' on page 9 undefined on input line 802.
+
+
+LaTeX Warning: Citation `gc3' on page 9 undefined on input line 802.
+
+No file lfp-paper.bbl.
+[9] [10] (lfp-paper.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 613 strings out of 20863
+ 6578 string characters out of 195485
+ 60317 words of memory out of 350001
+ 3559 multiletter control sequences out of 10000+15000
+ 25710 words of font info for 95 fonts, out of 400000 for 1000
+ 26 hyphenation exceptions out of 10000
+ 25i,7n,22p,256b,206s stack positions out of 3000i,100n,1500p,50000b,4000s
+
+Output written on lfp-paper.dvi (10 pages, 60020 bytes).

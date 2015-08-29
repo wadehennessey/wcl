@@ -1,0 +1,5 @@
+#!/bin/tcsh
+setenv LD_LIBRARY_PATH "../../dist-lib"
+../../dist-bin/wcl -m 24000 < compile-cl-script.lisp
+#../../bin/wcl -m 24000 < compile-clx-script.lisp
+

@@ -1,0 +1,9 @@
+PROCESSOR = "x86"
+OPERATING_SYSTEM = "Linux"
+CC = "gcc"
+LIBRARY_CONFIG = *debug-library-config*
+BIN_CONFIG = *default-config*
+SHORT_SITE_NAME = "Palau"
+LONG_SITE_NAME =  "Palau"
+WCL_VERSION = "3.0"
+

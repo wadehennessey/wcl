@@ -1,0 +1,9 @@
+PROCESSOR = "x86"
+OPERATING_SYSTEM = "Linux"
+CC = "gcc"
+DEBUG_LIBRARY = t
+LIBRARY_CONFIG = *debug-library-config*
+BIN_CONFIG = *default-config*
+SHORT_SITE_NAME = "Uninitialized short site name"
+LONG_SITE_NAME =  "Uninitialized long site name"
+

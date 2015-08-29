@@ -1,0 +1,40 @@
+   Copyright (C) 1990 - 2005 Wade L. Hennessey  All rights reserved.
+
+This file is part of WCL.
+
+WCL is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY.  No author or distributor accepts responsibility
+to anyone for the consequences of using it or for whether it serves any
+particular purpose or works at all, unless he says so in writing. 
+
+Everyone is granted permission to copy, modify and redistribute
+WCL, but only under the conditions described in doc/LICENSE file.
+
+
+WCL OVERVIEW
+------------
+
+Common Lisp implementations for Unix have traditionally provided a
+rich development environment at the expense of an inefficient delivery
+environment.  The goal of WCL is to allow hundreds of Lisp
+applications to be realistically available at once, while allowing
+several of them to run concurrently.  WCL accomplishes this by
+providing Common Lisp as a Unix shared library that can be linked with
+Lisp and C code to produce efficient applications.  For example, the
+executable for a Lisp version of the canonical ``Hello World!''
+program requires only 20k bytes on 32 bit x86 Linux.  WCL also
+supports a full development environment, including dynamic file
+loading and debugging.  A modified version of GDB is used to debug WCL
+programs, providing support for mixed language debugging.  The
+techniques used in WCL should also be applicable to other high-level
+languages that allow runtime mappings from names to objects.
+
+
+WCL DOCUMENTATION
+-----------------
+
+doc/COPYING -   WCL copying terms
+doc/LICENSE -   WCL license terms
+doc/INSTALL -   information about installing WCL
+doc/lfp-paper.* - 1992 Lisp and Functional Programming Conference paper on WCL
+doc/wcl.text -   Scant information about WCL usage and porting.

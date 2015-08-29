@@ -1,0 +1,21 @@
+This directory contains a port to WCL of Richard Waters 8/31/90
+implementation of the xp pretty-printer. The functionality provided by the
+pretty printer is documented in Chapter 27 of Cltl2.
+
+TO COMPILE: Type "make install" or see compile-script.lisp
+TO LOAD: (load "load-script.lisp")
+
+The pretty printer functions are exported from the XP package.
+However, you must reference them explicitly rather than trying to
+(USE-PACKAGE "XP") because the XP functions conflict with functions
+exported from the LISP package. Thus, you must say XP:PPRINT you want
+to use the pretty printer.  This will be fixed when the pretty printer
+is integrated into the library.  However, before including this code
+in libwcl, it needs more work to reduce top-level initializations.
+Then the functions in the interface file should replace corresponding
+wcl functions.
+
+(set-pprint-dispatch+ '(satisfies function-call-p) #'fn-call '(-5) *IPD*)
+Causes a load time call to compile:
+ 1> Entering COMPILE  NIL (LAMBDA (X) (FUNCALL (FUNCTION FUNCTION-CALL-P) X))
+

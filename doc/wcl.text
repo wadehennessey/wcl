@@ -1,0 +1,638 @@
+			A TERSE GUIDE TO WCL
+
+
+RUNNING WCL
+-----------
+
+The following development binaries are provied with wcl:
+
+	bin/eval - linked with basic CL library.
+	bin/wcl -  linked with compiler and CL libraries.
+	bin/clx - linked with CLXR5, compiler, and CL libraries.
+
+Normally a wcl development binary is run from within emacs. The file
+emacs/wcl.el should loaded into emacs and the value of the emacs
+variables WCL-ROOT-DIRECTORY and WCL-BIN should be set for your site.
+You must also install WGDB and make sure that your path is correctly
+setup to run it. 
+
+After these initial steps, The command m-x run-wcl will start wcl
+running under gdb. Once wcl is running, definitions from a lisp file can
+be loaded into the running wcl using the command c-m-x.
+
+When running wcl directly from the command line, the -m switch allows
+you to specify how large you want the heap to be in 1kbyte increments.
+The default size is 8192 (i.e - an 8 meg heap).  The -s switch allow you
+to specify the size of static space. Once wcl is started, the heap
+size is fixed (this should be fixed someday). The heap sizes for
+a wcl run using m-x run-wcl must be changed by altering the file
+emacs/gdb-init.gdb.
+
+After wcl has started, it will load an initialization file named
+~/.wclinit if it exists.
+
+
+LOADABLE SYSTEMS
+----------------
+
+Ports of the following systems are provided:
+
+	- Cltl2 Pretty Printer - loaded by (load-pprint)
+ 	- PCL: loaded by (load-clos)
+	- Logical Pathnames: loaded by (load-logical-pathnames)
+
+Refer to the README file or sources for each system for more details.
+
+CLX
+---
+
+CLX R5 is provided as an optional library. 
+
+TO TEST:
+cd to src/clx/test directory
+% clx
+(in-package "XLIB")
+;;; Compile these files for better performance
+(load "hello.lisp") 
+(load "menu.lisp")
+
+(hello-world "") 
+(just-say-lisp "")
+(pop-up "" '("chocolate" "strawberry" "asparagus"))
+
+
+EXTENSIONS TO CL
+----------------
+
+WCL contains some popular extensions to pure CLtl1. 
+Refer to the sources and the file lib/rtl/packages/package-setup-info.lisp
+for more information.
+
+
+FOREIGN FUNCTION CALLS
+----------------------
+
+The macro DEFFOREIGN is used to tell Lisp how to call foreign
+functions:
+
+  (defforeign unlink ((path char*) => (status int)))
+
+The foreign function interface is incomplete and needs more work.
+Refer to other examples of how DEFFOREIGN is currently used in the
+system for more information.
+
+Calls from foreign code back into Lisp work equally well, but no
+formal support for them exists. In other words, you need to know the
+mangled name of the Lisp function you want to call, pass an argument
+count, and perform any data conversions yourself.
+
+The macro DEF-C-STRUCT is also useful for describing the layout
+of foreign structures to Lisp.
+
+
+DEBUGGING WITH WGDB *******NOTE - this section is obsolete*********
+-------------------
+
+A slightly modified version of WGDB is used as the debugger for both C
+and Lisp code.  It's best to run WGDB from within emacs using m-x gdb.
+Using WGDB with WCL is best explained with a few examples:
+
+file foo.lisp
+--------------
+(in-package "USER")
+
+(defun top (x)
+  (middle x))
+
+(defun middle (x)
+  (bottom x))
+
+(defun bottom (foo-bar)
+  (+ foo-bar 2))
+------------
+
+First we'll see how WGDB debugs interpreted code by loading foo.lisp and
+calling TOP with a string rather than a number:
+
+> (load "foo.lisp")
+#P"/usr/home/wade/w/current/test/foo.lisp"
+
+> (top "bad arg")
+Error: "bad arg" is not a number
+
+Program received signal 2, Interrupt
+0xf759c120 in kill
+Debug>
+
+We can get a backtrace with the WGDB command "bt":
+Debug> bt           
+#0  0xf759c120 in kill
+#1  0xf76ac6a8 in lisp_debug
+#2  0xf767c4a4 in ERROR
+#3  0xf7675804 in ARITH-ERROR
+#4  0xf76a8c54 in add
+#5  0xf767a898 in +
+#17 0xf76aca7c in BOTTOM (interpreted)
+#29 0xf76aca7c in MIDDLE (interpreted)
+#41 0xf76aca7c in TOP (interpreted)
+#49 0xf76814a0 in REPL-1
+#50 0xf76819dc in REPL
+#51 0x4cf0 in LMAIN
+#52 0x4c5c in RUN-APPLICATION
+#53 0x4c88 in main
+
+Next we can go directly to a specific frame number with the WGDB "frame"
+command. The frame numbers are not always contiguous when debugging
+interpreted code because WGDB is hiding evaluator frames which we normally
+do not want to see. If we do want to see them, the new WGDB "hide" command
+toggles hiding of interpreter frames. For now we'll go directly to
+the frame for BOTTOM:
+
+Debug> frame 17       
+#17 0xf76aca7c in BOTTOM (interpreted)
+
+We can now walk up and down the stack with the WGDB "up" and "down"
+commands. Notice that these commands skip hidden frames:
+
+Debug> up
+#29 0xf76aca7c in MIDDLE (interpreted)
+Debug> up
+#41 0xf76aca7c in TOP (interpreted)
+Debug> down
+#29 0xf76aca7c in MIDDLE (interpreted)
+Debug> down
+#17 0xf76aca7c in BOTTOM (interpreted)
+
+Now that we are back in BOTTOM, we can use the new WGDB "eval" command
+to enter an inferior read-eval-print loop in the lexical environment
+of the current frame. This is especially useful for debugging, because
+all variables are available by name:
+
+Debug> eval    
+
+Call: (BOTTOM "bad arg")
+Entering debug evaluator. Type :A to exit
+Evaluating forms in the current frame's lexical environment
+
+Eval:1> foo-bar   ; look at the value of the argument BOTTOM
+"bad arg"
+
+Eval:1> (inspect foo-bar)
+Inspecting a SIMPLE-STRING at address #x48E35D
+
+[0] #\b
+[1] #\a
+[2] #\d
+[3] #\Space
+[4] #\a
+[5] #\r
+[6] #\g
+
+Command (:H for help): :q
+
+"bad arg"
+
+Eval:1> :a
+$3 = -143023479
+
+:A aborts from the inferior read-eval-print loop back to WGDB. At this
+point we can simply abort the entire computation with the new
+WGDB "abort" command:
+
+Debug> abort
+Aborting to top-level
+Continuing at 0xf76ac684.
+
+Compiled code can also be debugged in a similar manner.
+WGDB will automatically update its symbol table when an object
+file is dynamically loaded into the underlying Lisp process:
+
+> (compile-file "foo")
+#P"foo.o"
+
+> (load *)
+#P"/usr/home/wade/w/current/test/foo.o"
+
+> (top "bad arg")
+Error: "bad arg" is not a number
+
+Program received signal 2, Interrupt
+0xf759c120 in kill
+Debug> bt
+#0  0xf759c120 in kill
+#1  0xf76ac6a8 in lisp_debug
+#2  0xf767c4a4 in ERROR
+#3  0xf7675804 in ARITH-ERROR
+#4  0xf76a8c54 in add
+#5  0xf6eec17c in BOTTOM at foo.c:51
+#6  0xf6eec11c in MIDDLE at foo.c:41
+#7  0xf6eec080 in TOP at foo.c:31
+#15 0xf76814a0 in REPL-1
+#16 0xf76819dc in REPL
+#17 0x4cf0 in LMAIN
+#18 0x4c5c in RUN-APPLICATION
+#19 0x4c88 in main
+Debug> frame 5
+#5  0xf6eec17c in BOTTOM at foo.c:51
+Source file is more recent than executable.
+Debug> up
+#6  0xf6eec11c in MIDDLE at foo.c:41
+Debug> up
+#7  0xf6eec080 in TOP at foo.c:31
+Debug> down
+#6  0xf6eec11c in MIDDLE at foo.c:41
+Debug> down
+#5  0xf6eec17c in BOTTOM at foo.c:51
+
+We can walk the stack just as we did earlier, but this time WGDB shows
+us the name name of the C file and the line number of our compiled
+code. You will also see the corresponding C code displayed in another
+window if you are using WGDB under emacs.  Notice that WCL library
+functions such as ERROR have not been compiled with debugging
+information. The WCL library can optionally be compiled with debugging
+information if it is desired.  Refer to the installation documentation for
+more details.
+
+WGDB currently cannot debug compiled Lisp code at the Lisp source
+code level.  However, it can debug compiled Lisp code at the C source
+level using any existing WGDB commands such as break, step, etc.
+as well as the new WGDB command "lp", which prints the value
+of a variable as a Lisp expression:
+
+Debug> lp v_FOO_2DBAR_0 ; use the mangled Lisp name displayed in source window
+"bad arg"
+$1 = 4706509
+Debug> eval ; or: "eval v_FOO_2DBAR_0" and * is bound to the value of FOO-BAR
+
+Entering debug evaluator. Type :A to exit
+Evaluating forms in the null lexical environment
+
+Eval:1> (+ 1 2)
+3
+
+Eval:1> :a
+Debug>
+
+Notice that the "eval" command still works with compiled code, but
+unfortunately it does not have access to the current lexical
+environment (although it could be reconstructed), so the null lexical
+environment is used instead. Eval also accepts a variable name as an
+optional argument, and will bind the Lisp symbol "*" to the value of
+that variable upon entering evaluator. As before we can abort back to
+top-level:
+
+Debug> abort
+Aborting to top-level
+Continuing at 0xf76ac684.
+
+> 
+
+The new "abort" command is also useful if Lisp is in the middle of a
+long computation or an infinite loop that we could like to end:
+
+> (loop for i from 1 to 1000 do (format t "Iteration ~D~%" i))
+Iteration 1
+Iteration 2
+Iteration 3
+...
+Iteration 81
+Iteration 82  
+;;; type control-c
+
+Program received signal 2, Interrupt
+0xf75722d8 in write
+Debug> bt
+#0  0xf75722d8 in write
+#1  0xf7573a58 in _xflsbuf
+#2  0xf757382c in _flsbuf
+#3  0xf75a685c in fputc
+#4  0xf7670630 in WRITE-CHAR/FPTR-STREAM
+#5  0xf7670670 in WRITE-CHAR/TERMINAL-STREAM
+#6  0xf7670360 in WRITE-CHAR/2
+#7  0xf7686e44 in TERPRI
+#8  0xf7651de0 in FORMAT-TERPRI
+#9  0xf764c128 in SUB-FORMAT
+#10 0xf764b580 in FORMAT
+#31 0xf76aca7c in (LAMBDA (I) ...) (interpreted)
+#39 0xf76814a0 in REPL-1
+#40 0xf76819dc in REPL
+#41 0x4cf0 in LMAIN
+#42 0x4c5c in RUN-APPLICATION
+#43 0x4c88 in main
+
+After interrupting the loop, we can continue it with the WGDB
+"continue" command:
+
+Debug> continue
+Continuing.
+Iteration 83
+Iteration 84
+Iteration 85
+...
+Iteration 289
+Iteration 290
+;;; type control-c again
+
+Program received signal 2, Interrupt
+0xf75722d8 in write
+Debug> 
+
+We interrupt the loop again and abort to top-level with the 
+"abort" command:
+
+Debug> abort
+Aborting to top-level
+Continuing at 0xf76ac684.
+
+> 
+
+The new commands "info restarts" and "restart" allow WGDB to interact
+with the CL condition system.
+
+Ultimately, WGDB should be modified to provide full source level
+debugging of Lisp code.
+
+
+LINKING APPLICATIONS WITH SHARED LIBRARIES
+------------------------------------------
+
+Here's a quick example of how to compile and link an application
+consisting of two files:
+
+file bar.lisp:
+---------------------
+(in-package "USER")
+
+(defstruct point x y)
+---------------------
+
+file foo.lisp:
+---------------------
+(in-package "USER")
+
+(defun lmain ()
+  (format t "Point: ~S~%" (make-point :x 3 :y 4)))
+---------------------
+
+In WCL:
+
+> (compile-file "bar")
+Compiling file #P"bar.lisp"
+Wrote object file #P"bar.o"
+#P"bar.o"
+
+> (compile-file "foo")
+Compiling file #P"foo.lisp"
+Wrote object file #P"foo.o"
+#P"foo.o"
+
+>  (link-executable '("foo" "bar"))
+0 seconds: Reading symbol information
+1 seconds: Compiling predicates file
+Compiling file #P"/n/kobold/usr1/home/wade/tmp/26123-23preds.lisp"
+Wrote object file #P"/n/kobold/usr1/home/wade/tmp/26123-23preds.o"
+4 seconds: Writing data file
+4 seconds: Compiling data file
+10 seconds: done
+#P"foo"
+>
+
+Now we can run it from a shell:
+
+/home/wade/test> strip foo
+/home/wade/test> size foo
+text	data	bss	dec	hex
+40960	8192	0	49152	c000
+/home/wade/test> foo
+Point: #<POINT 64ADD>
+/home/wade/test> 
+
+CREATING SHARED LIBRARIES OF LISP CODE
+--------------------------------------
+
+Here is an example of how to create a shared library from two
+files name foo.lisp and bar.lisp:
+
+foo.lisp
+---------
+(in-package "DEMO")
+
+(defun fact (n)
+  (if (= n 0)
+      1
+      (* n (fact (- n 1)))))
+---------
+
+bar.lisp
+---------
+(in-package "DEMO")
+
+(defun example (int double string)
+  (format t "int: ~A, double: ~A, string: ~A~%" int double string)
+  (format t "Fact ~A = ~A~%" int (fact int))
+  86)
+---------
+
+After starting Lisp, we do the following:
+
+> (in-package "DEMO")
+#<PACKAGE "DEMO" (0 symbols) 75181>
+
+> (define-library :demo 1.0
+                  :directory "/home/wade/demo/"
+                  :lisp-files '("foo.lisp" "bar.lisp")
+                  :other-object-files nil
+                  :init-thunk "init_library_demo")
+#<LIBRARY 7C22D>
+
+> (compile-file "foo")
+;;; Finishing delayed defstruct definitions
+;;; Warning: Loading CL library compiler information
+Compiling file #P"foo.lisp"
+Wrote object file #P"foo.o"
+#P"foo.o"
+
+> (compile-file "bar")
+Compiling file #P"bar.lisp"
+Wrote object file #P"bar.o"
+#P"bar.o"
+
+> (link-library :demo
+		:other-lib-names '(:cl))
+;;; Warning: Reading CL library linking information
+38 seconds: Reading symbol information
+39 seconds: Compiling predicates file
+Compiling file #P"/n/kobold/usr1/home/wade/tmp/16304-9preds.lisp"
+Wrote object file #P"/n/kobold/usr1/home/wade/tmp/16304-9preds.o"
+42 seconds: Writing data file
+42 seconds: Compiling data file
+;;; Warning: Writing DEMO library information
+44 seconds: Linking shared library
+#<LIBRARY 7C22D>
+
+We now have a shared library of Lisp code called libdemo.so.1.0:
+
+/home/wade/demo> ls -l lib*
+-rwxr-xr-x  1 wade        32768 Aug  6 16:55 libdemo.so.1.0*
+
+/home/wade/demo> size lib*
+text	data	bss	dec	hex
+8192	8192	0	16384	4000
+
+
+CALLING SHARED LIBRARIES FROM C
+-------------------------------
+
+Although there is a nice foreign interface from Lisp to C, there
+is no corresponding inteface from C to Lisp. For example, I can
+tell Lisp how to call a C function as follows:
+
+(defforeign connect_to_server ((host char*) (display int) => (value int)))
+
+However, there is not corresponding way to tell C how to call Lisp.
+Thus, you have to manually write the "wrapper" functions which call
+back into Lisp. For example, to call this Lisp function: 
+
+(defun example (int double string)
+  (format t "int: ~A, double: ~A, string: ~A~%" int double string)
+  (format t "Fact ~A = ~A~%" int (fact int))
+  86)
+
+You need to use the following C code:
+
+extern LP p_demo_EXAMPLE(int argc, LP i, LP f, LP s);
+
+example(int i, double f, char* str)
+{
+  LP result;
+
+  result = p_demo_EXAMPLE(3,	/* arg count */
+			  INT32_TO_INTEGER(i),
+			  NEW_FLOAT(f),
+			  c_to_lisp_string(str));
+  return(INTEGER_TO_INT32(result));
+}
+
+Here is an example of how to call the DEMO library created above from
+a file called demo.c:
+
+demo.c
+-------
+#include "/home/wade/w/current/include/lisp.h"
+
+#define DYNAMIC_HEAP_KBYTES 3000
+#define STATIC_HEAP_KBYTES  200
+
+/* Wrapper functions like this have to be manually written 
+   until a c-to-lisp foreign function interface is provided.
+   */
+extern LP p_demo_EXAMPLE(int argc, LP i, LP f, LP s);
+
+example(int i, double f, char* str)
+{
+  LP result;
+
+  result = p_demo_EXAMPLE(3,	/* arg count */
+			  INT32_TO_INTEGER(i),
+			  NEW_FLOAT(f),
+			  c_to_lisp_string(str));
+  return(INTEGER_TO_INT32(result));
+}
+
+main(int argc,char *argv[])
+{
+  char foo[] = "C String";
+  int i;
+
+  start_initialization(argc,argv,DYNAMIC_HEAP_KBYTES,STATIC_HEAP_KBYTES);
+  init_library_cl();
+  init_library_demo();
+  
+  i = example(30,3.14,foo);
+  printf("result = %d, New foo: %s\n",i,foo);
+}
+---------
+
+Notice that our main program has to initialize the libraries before
+it can use them. Now we can compile and run demo.c:
+
+/home/wade/demo> gcc -g -o demo demo.c -L/home/wade/w/current/lib -L/home/wade/demo -ldemo -lcl -lc -lm
+
+/home/wade/demo> size demo
+text	data	bss	dec	hex
+40960	8192	0	49152	c000
+
+/home/wade/demo> demo
+int: 30, double: 3.14, string: C String
+Fact 30 = 265252859812191058636308480000000
+result = 86, New foo: C String
+
+In this example, we simply returned an integer from Lisp to C. However, 
+if heap allocated data returned is retunred from Lisp to C, then
+it must either be statically allocated using WITH-STATIC-SPACE, or
+a reference to the object must be kept on the C stack or in a register
+for the life of the object, since there is currently no way to
+advise the gc of extra roots. This restriction can be fixed fairly
+easily by allowing C code to register new roots with the GC, but there
+is currently no provision for doing so.
+
+THE COMPILER
+------------
+
+The compiler is controlled by setting up different configurations.
+refer to com/common/configurations.lisp for more information.
+PROCLAIM is the CL approved way to change configurations.
+
+Array and numeric declarations are used by the compiler to translate
+Lisp array operations and some numeric operations directly into 
+equivalent C constructs. Dynamic-extent &REST lists are supported, as
+are &RESTV lists.
+
+
+GARBAGE COLLECTION
+------------------
+
+The currently collector is based upon the ideas described in Joel
+Bartlett's mostly-copying conservative gc. A single heap area and a
+single static area are used for allocating memory at runtime.
+Statically allocated data can also be located in the data segment of
+a program and any shared libraries that it uses.
+
+Note that it is possible for a C compiler to generate code which uses
+derived or offset pointers, and thus is not safe for garbage
+collection. This can be big trouble, but Sun cc and gcc don't *seem* to
+have this problem (i.e - they're not that tricky).
+
+PORTING WCL
+-----------
+
+The dynamic file loader is the most operating system and machine
+dependent part of the system. Currently the dynamic file loader does not work.
+
+Every machine has a corresponding machine configuration structure
+in the compiler.
+
+These parts of the system are written in assembly language, and
+thus are processor specific:
+
+	- Closure allocation and closure garbage collection.
+
+	- Fixnum arithmetic handling. Fixnum arithmetic must overflow
+          into bignums correctly. On SPARC this is done with an explicit
+          overflow check, and on MIPS it is done by the signal handler.
+
+	- The garbage collector needs a machine dependent routine to put any
+          registers not normally saved by the C calling convention into a
+          stack allocated vector.
+
+The actual amount of assembly code is small (perhaps a few dozen lines).
+ 
+Generic bignum code is available, but machine specific bignum routines
+are also available for a variety of machines.  All the sources are in
+the bignum directory.
+
+BUG REPORTS
+-----------
+
+Please report any bug reports or questions to wcl@xkey.com
+

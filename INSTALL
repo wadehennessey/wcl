@@ -1,0 +1,27 @@
+TO INSTALL
+----------
+
+As root in the wcl/linux directory, type 
+	
+	make install
+
+The command "wcl" should then invoke wcl.
+
+If you don't have root access or for some reason the wcl executables cannot find the needed libraries, explicitly say where to find them (i.e):
+
+setenv LD_LIBRARY_PATH /home/wade/wcl/linux/lib
+
+
+TO COMPILE FROM SOURCE
+----------------------
+In the same directory as this file do the following
+
+mv bin dist-bin
+mv lib dist-lib
+mkdir bin
+mkidr lib
+cd src/build
+./compile-all
+
+This runs the current binaries from a directory called dist-bin and places the newly compiled binaries in bin and the newly compiled libraries in lib. 
+
