@@ -14,14 +14,11 @@ setenv LD_LIBRARY_PATH /home/wade/wcl/lib
 
 TO COMPILE FROM SOURCE
 ----------------------
-In the same directory as this file do the following
+In the same directory as this file do the following:
 
-rf -rf dist-bin dist-lib
-mv bin dist-bin
-mv lib dist-lib
-mkdir bin lib
-cd src/build
-./compile-all
+make rebuild
 
-This runs the current binaries from a directory called dist-bin and places the newly compiled binaries in bin and the newly compiled libraries in lib. 
+This runs the current binaries from directories called called dist-bin and
+dist-lib and places the newly compiled binaries in bin and lib.
+
 

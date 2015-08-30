@@ -4,6 +4,7 @@
 #include <math.h>
 #include <gmp.h>
 #include <stdio.h>
+#include <string.h>
 
 #define swap(x,y) {LP tmp = x; x = y; y = tmp;}
 #define abs(x) ((x) >= 0 ? (x) : -(x))

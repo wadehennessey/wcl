@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <stdio.h>
+#include <string.h>
 #include "lisp.h"
 #include "closure.h"
 #include "limits.h"
@@ -710,14 +712,6 @@ void check_memory(long start_page, long end_page, long verbose) {
   }
 }
 
-// HEY! gcc version 5.1.1 20150618 (Red Hat 5.1.1-4) (GCC)
-// makes this return 0 even with -g!
-unsigned long *get_stack_pointer() {
-  long i;
-  
-  return((unsigned long *) &i);
-}
-
 void intern_symbols(LP package_name, unsigned long *symbols) {
   unsigned long* syms;
   LP package;
@@ -819,7 +813,6 @@ void scan_stack() {
   unsigned long *low;
 
   copy_regs_to_stack(&(regs[0]));
-  //low = get_stack_pointer();
   low = (unsigned long *) &low;
   scan_memory_segment(low,stack_bottom,"Stack");
 }

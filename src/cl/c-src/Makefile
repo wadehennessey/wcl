@@ -1,7 +1,9 @@
 #  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. 
 
+# HEY! try to compile cleanly without -w
+# make clean; make linux-pc-64
 # HEY! Put -O2 back in 
-CC = gcc -w -xc -pipe -g -fPIC -c 
+CC = gcc -w -xc -pipe -g -fPIC -c
 
 linux-pc: x86 linux-pc-socket.o linux-pc-cache-flush.o linux-interrupts.o
 

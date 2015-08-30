@@ -24,6 +24,13 @@ pcl:
 logical-pathnames:
 	(cd src/misc; make install)
 
+rebuild:
+	rm -rf dist-bin dist-lib
+	mv bin dist-bin
+	mv lib dist-lib
+	mkdir bin lib
+	(cd src/build; ./compile-all)
+
 clean:
 	find . -name "*.*bin*" -exec rm -f {} \;
 	find . -name "*.o" -exec rm -f {} \;
