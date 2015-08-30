@@ -1,13 +1,16 @@
+   Copyright (C) 1990 - 2015 Wade L. Hennessey  All rights reserved.
+   
 TO INSTALL
 ----------
 
-As root in the wcl/linux directory, type 
+As root in the same directory as this file, do the following:
 	
 	make install
 
 The command "wcl" should then invoke wcl.
 
-If you don't have root access or for some reason the wcl executables cannot find the needed libraries, explicitly say where to find them (i.e):
+If you don't have root access or for some reason the wcl executables cannot 
+find the needed libraries, explicitly say where to find them (i.e):
 
 setenv LD_LIBRARY_PATH /home/wade/wcl/lib
 
