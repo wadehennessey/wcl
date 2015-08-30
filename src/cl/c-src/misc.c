@@ -3,8 +3,15 @@
 #include "lisp.h"
 #include <sys/utsname.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
-extern LP ubf_handler(ARGC argc, ...);
+LP ubf_handler(ARGC argc, ...);
+LP p_lsp_REPL(int argc);
+void init_library_cl();
+
+void start_initialization(int argc, char *argv[],
+			  int dynamic_memory_size, int static_memory_size);
 
 PROCEDURE ubf_procedure = {TYPE_PROCEDURE, (LP) ubf_handler};
 UBV ubv_marker= {TYPE_UBV, 0};
@@ -83,11 +90,10 @@ LP new_foreign_ptr(LP type, LP ptr) {
 int getosversion(char *name, int namelen)
 {
   struct utsname sysinfo;
-  int status;
 
   uname(&sysinfo);
-  status = strcpy(name,&(sysinfo.release[0]));
-  return(status);
+  strcpy(name,&(sysinfo.release[0]));
+  return(1);
 }
 
 int host_bits_per_word() {
@@ -100,7 +106,7 @@ void repl() {
 
 void init_wcl(int dynamic_size, int static_size) {
   char *arg1 = "embedded_wcl";
-  char *argv = arg1;
+  char **argv = &arg1;
 
   start_initialization(1,argv,dynamic_size, static_size);
   init_library_cl();

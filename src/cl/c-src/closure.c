@@ -10,6 +10,8 @@
 #include "closure.h"
 #include "limits.h"
 
+void flush_cache(char *p);
+
 LP OE = 0;				/* outer env is passed through this */
  
 void flush_cache_addresses(void *start, int byte_count) {
@@ -37,7 +39,7 @@ LP new_closure(LP code, LP env) {
       Next put code ptr into $rax and jmp to it.
   */
   trampoline->movq1 = 0xbb49;
-  (*(unsigned long *)(trampoline->oe_addr)) = &OE;
+  (*(unsigned long *)(trampoline->oe_addr)) = (unsigned long) &OE;
   trampoline->movl1[0] = 0x41;  
   trampoline->movl1[1] = 0xc7;
   trampoline->movl1[2] = 0x03;

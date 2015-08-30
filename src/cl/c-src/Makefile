@@ -3,7 +3,9 @@
 # HEY! try to compile cleanly without -w
 # make clean; make linux-pc-64
 # HEY! Put -O2 back in 
-CC = gcc -w -xc -pipe -g -fPIC -c
+WCC = gcc -w -xc -pipe -g -fPIC -c
+
+CC = gcc -xc -pipe -g -fPIC -c
 
 linux-pc: x86 linux-pc-socket.o linux-pc-cache-flush.o linux-interrupts.o
 
@@ -22,7 +24,7 @@ common:	 chars.o arith.o  array.o generic-loader.o  \
 	 dynamic.o misc.o eval-code.o
 
 dynamic.o: lisp.h
-	$(CC) -c    dynamic.c
+	$(WCC) -c    dynamic.c
 
 time.o:	lisp.h
 	$(CC) -c    time.c
@@ -46,7 +48,7 @@ eval-code.o:	lisp.h eval-code.c
 	$(CC) -c -g  eval-code.c
 
 memory.o:	lisp.h memory.c
-	$(CC) -c    memory.c
+	$(WCC) -c    memory.c
 
 chars.o:	lisp.h chars.c
 	$(CC) -c    chars.c
@@ -61,7 +63,7 @@ io.o:		lisp.h io.c
 	$(CC) -c    io.c
 
 closure.o:	lisp.h closure.c
-	$(CC) -c    closure.c
+	$(WCC) -c    closure.c
 
 linux-pc-socket.o:	lisp.h 
 	$(CC) -c    -DUNIXCONN -o socket.o linux-pc-socket.c

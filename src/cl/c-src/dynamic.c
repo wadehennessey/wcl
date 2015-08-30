@@ -1,6 +1,8 @@
 /*  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. */
 
 #include "lisp.h"
+#include <stdio.h>
+#include <setjmp.h>
 
 UW_POINT *uw_top = NULL;
 
@@ -38,34 +40,6 @@ void verify_chain() {
   }
 }
 
-
-LP throw(LP tag, LP value, MV *mv_holder) {
-  UW_POINT *dest;
-  int i;
-
-  dest = find_uw_tag(tag,UW_CATCH);
-  /* Pass multiple values if we have them and
-     the catcher wants them */
-  if ((MV_HOLDER_P(dest->mv_holder)) && (mv_holder->return_flag == 1)) {
-    dest->mv_holder->return_flag = 1;
-    dest->mv_holder->argc = mv_holder->argc;
-    /* Copy values into dest holder. Look, no Consing! */
-    for (i = 0; i < mv_holder->argc; i++) {
-      dest->mv_holder->values[i] = mv_holder->values[i];
-    }
-  }
-  unwind(dest,value);
-}
-
-
-LP dynamic_go(LP tag) {
-  UW_POINT *dest;
-
-  dest = find_uw_tag(tag,UW_DYNAMIC_TAG);
-  unwind(dest,1);
-}
-
-
 int unwind(UW_POINT *dest, LP value) {
   while (uw_top != NULL) {
     if  ((UW_POINT *) dest == uw_top) {	/* Why is the cast needed? */
@@ -95,4 +69,30 @@ int unwind(UW_POINT *dest, LP value) {
     }
   }
   printf("ERROR: Unwind exhausted the uw_chain\n");
+}
+
+LP throw(LP tag, LP value, MV *mv_holder) {
+  UW_POINT *dest;
+  int i;
+
+  dest = find_uw_tag(tag,UW_CATCH);
+  /* Pass multiple values if we have them and
+     the catcher wants them */
+  if ((MV_HOLDER_P(dest->mv_holder)) && (mv_holder->return_flag == 1)) {
+    dest->mv_holder->return_flag = 1;
+    dest->mv_holder->argc = mv_holder->argc;
+    /* Copy values into dest holder. Look, no Consing! */
+    for (i = 0; i < mv_holder->argc; i++) {
+      dest->mv_holder->values[i] = mv_holder->values[i];
+    }
+  }
+  unwind(dest,value);
+}
+
+
+LP dynamic_go(LP tag) {
+  UW_POINT *dest;
+
+  dest = find_uw_tag(tag,UW_DYNAMIC_TAG);
+  unwind(dest,1);
 }

@@ -13,7 +13,7 @@ cl:
 	(cd src/build; ./compile-all)
 
 clx:
-	(cd src/build; ../../bin/wcl -m 12000 < compile-clx-script.lisp)
+	(cd src/build; ../../bin/wcl -m 24000 < compile-clx-script.lisp)
 
 pprint:
 	(cd src/cl/pprint; make install)

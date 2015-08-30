@@ -1,6 +1,7 @@
 /*  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. */
 
 #include "lisp.h"
+#include <stdio.h>
 
 extern LP p_lsp_COERCE_2DTO_2DFUNCTION (ARGC argc, LP procedure);
 extern LP ubf_handler (ARGC argc, ...);

@@ -2,7 +2,12 @@
 
 #include "lisp.h"
 #include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
 
+LP p_lsp_SELECT_2DRESTART_2DOPTION(int argc);
+LP p_lsp_ABORT_2DTO_2DTOP_2DLEVEL(int argc);
 
 void select_restart_option() {
   p_lsp_SELECT_2DRESTART_2DOPTION(0);

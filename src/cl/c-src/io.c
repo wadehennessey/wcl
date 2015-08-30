@@ -8,6 +8,7 @@
 #include <sys/param.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 
 FILE *get_file_ptr(int index) {
   switch (index) {
@@ -210,10 +211,8 @@ int write_vector(FILE *file, int element_size, LP vector, int start, int end) {
   return(status);
 }
 
-
-
 int string_column(char *string, int current_column) {
-  while (*string != NULL) {
+  while (*string != 0) {
     if (*string == '\n') {
       current_column = 0;
     } else {

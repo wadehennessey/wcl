@@ -5,9 +5,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 extern char *optarg;
-extern signal_handler();
+typedef void (*sighandler_t)(int);
+void signal_handler(int signal);
+
+void init_memory_allocator(int dynamic_memory_size, int static_memory_size);
+void init_run_time();
+void init_real_time();
+void init_arith();
+  
+sighandler_t signal(int signum, sighandler_t handler);
 
 #define DEFAULT_DYNAMIC_MEMORY_SIZE 8192
 #define DEFAULT_STATIC_MEMORY_SIZE 512

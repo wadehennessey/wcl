@@ -56,10 +56,11 @@
 
 LP least_positive_bignum;
 LP least_negative_bignum;
-unsigned long w_lib_symbols[],w_app_symbols[];
-unsigned long key_lib_symbols[],key_app_symbols[];
+//unsigned long w_lib_symbols[],w_app_symbols[];
+//unsigned long key_lib_symbols[],key_app_symbols[];
 LP p_lsp_FIND_2DOR_2DMAKE_2DPACKAGE();
 LP p_lsp_ADD_2DSYMBOL(int argc, LP syms, LP package);
+void copy_regs_to_stack(long *regs);
 
 // HEY! why are these needed?
 void full_gc();

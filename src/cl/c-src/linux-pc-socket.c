@@ -13,15 +13,12 @@
 #include "./X11/Xproto.h"
 #include <errno.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/ioctl.h>
 #include <netdb.h> 
 #include <sys/socket.h>
-#ifndef hpux
-#include <netinet/tcp.h>
-#endif
-
-extern int errno;		/* Certain (broken) OS's don't have this */
-				/* decl in errno.h */
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #ifdef UNIXCONN
 #include <sys/un.h>

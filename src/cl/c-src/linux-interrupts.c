@@ -2,10 +2,12 @@
 
 #include "lisp.h"
 #include <signal.h>
+#include <stdio.h>
 
-extern void lisp_debug();
+void lisp_debug();
+void abort_to_top_level();
 
-signal_handler (int sig, int code, struct sigcontext *scp) {
+int signal_handler (int sig, int code, struct sigcontext *scp) {
   printf("WCL: Ignoring signal number %d, aborting to top-level\n",sig);
   abort_to_top_level();
 }

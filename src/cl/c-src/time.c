@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <time.h>
 
 static int start_realtime;
 
@@ -18,6 +19,8 @@ int unix_time_of_day () {
 }
 
 void init_run_time() {
+  // Clock should already be running
+  // I don't think this does anything, since it ignores teh return value
   clock();			/*  start the runtime clock */
 }
 
