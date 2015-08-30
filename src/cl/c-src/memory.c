@@ -1,10 +1,10 @@
 /*  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. */
 
+#include "lisp.h"
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
-#include "lisp.h"
 #include "closure.h"
 #include "limits.h"
 
@@ -54,11 +54,13 @@
   ((pageinfo[page].generation == next_generation) && \
    (pageinfo[page].next_lock == UNSCANNED))
 
-extern LP least_positive_bignum;
-extern LP least_negative_bignum;
-extern unsigned long w_lib_symbols[],w_app_symbols[];
-extern unsigned long key_lib_symbols[],key_app_symbols[];
-extern LP p_lsp_FIND_2DOR_2DMAKE_2DPACKAGE();
+LP least_positive_bignum;
+LP least_negative_bignum;
+unsigned long w_lib_symbols[],w_app_symbols[];
+unsigned long key_lib_symbols[],key_app_symbols[];
+LP p_lsp_FIND_2DOR_2DMAKE_2DPACKAGE();
+LP p_lsp_ADD_2DSYMBOL(int argc, LP syms, LP package);
+
 // HEY! why are these needed?
 void full_gc();
 void move_sub_objects(LP ptr);
@@ -182,7 +184,7 @@ long free_static_bytes() {
   return(static_frontier_limit_ptr - static_frontier_ptr);
 }
 
-terminate_page() {
+void terminate_page() {
   if (DEBUG_GC) {
     printf("terminate_page, frontier: %p, remaining: %d\n",
 	   frontier_ptr,remaining_page_bytes);
@@ -508,7 +510,7 @@ void init_memory_allocator(long dynamic_kbytes, long static_kbytes) {
   }
   //  first_ptr = (LP) malloc(BYTES_PER_PAGE * (total_pages + 1));
   first_ptr = (LP) mmap_heap(BYTES_PER_PAGE * (total_pages + 1));
-  if ((first_ptr == 0) || (first_ptr == -1) || (pageinfo == 0)) {
+  if ((first_ptr == 0) || (first_ptr == (LP) -1) || (pageinfo == 0)) {
     printf("Cannot allocate enough memory\n");
     /* HEY! Should try to allocate less memory rather than exiting
        Put this in a common safe_malloc routine and use it consistently. */
@@ -720,7 +722,7 @@ void intern_symbols(LP package_name, unsigned long *symbols) {
      coerce to simple-string */
   package = p_lsp_FIND_2DOR_2DMAKE_2DPACKAGE(1,copy_c_to_lisp_string(package_name));
   for (syms = symbols; *syms != 0; syms = syms + 1) {
-    p_lsp_ADD_2DSYMBOL(2,*syms,package);
+    p_lsp_ADD_2DSYMBOL(2, (LP) *syms,package);
   }
 }
 

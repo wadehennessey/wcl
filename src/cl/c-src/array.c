@@ -1,8 +1,15 @@
 /*  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. */
 
 #include "lisp.h"
+#include <stdio.h>
+#include <string.h>
 
-#define VECTOR_BOUNDS_CHECK(v,fx_i,i) \
+LP p_lsp_ILLEGAL_2DELEMENT_2DTYPE(int argc, LP a, LP value);
+LP p_lsp_MULTI_2DARRAY_2DBOUNDS_2DERROR(int argc, LP a, LP indices);
+LP p_lsp_VECTOR_2DBOUNDS_2DERROR(int argc, LP v, LP fx_i);
+LP p_lsp_NOT_2DARRAY_2DERROR(int argc, LP a, LP x);
+
+#define VECTOR_BOUNDS_CHECK(v,fx_i,i)			   \
   if (!(FIXNUMP(fx_i) && (i >= 0) && (i < LEN_FIELD(v))))  \
   p_lsp_VECTOR_2DBOUNDS_2DERROR(2,v,fx_i);    
 

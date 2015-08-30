@@ -9,10 +9,11 @@
 #define swap(x,y) {LP tmp = x; x = y; y = tmp;}
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 
-extern long integer_add(long i, long j);
-extern long integer_subtract(long i, long j);
-extern long integer_multiply(long i, long j);
-extern LP alloc_float();
+long integer_add(long i, long j);
+long integer_subtract(long i, long j);
+long integer_multiply(long i, long j);
+LP alloc_float();
+LP p_lsp_ARITH_2DERROR(int argc, LP x, LP y);
 
 mpz_t least_positive_bignum;
 mpz_t least_negative_bignum;
@@ -117,7 +118,7 @@ LP normalize_bignum(mpz_t z) {
 
 
 double bignum_to_double(LP x) {
-  return(mpz_get_d(REMOVE_TAG(x)));
+  return(mpz_get_d((mpz_srcptr) REMOVE_TAG(x)));
 }  
 
 LP long_to_bignum(long i) {
@@ -154,9 +155,7 @@ LP bignum_logand(LP x, LP y) {
 }
 
 LP bignum_length(LP n) {
-  long length;
-
-  length = mpz_sizeinbase(REMOVE_TAG(n), 2);
+  long length = mpz_sizeinbase((mpz_srcptr) REMOVE_TAG(n), 2);
   return(LONG_TO_FX(length));
 }
 
@@ -172,14 +171,14 @@ LP ulong_to_bignum(unsigned long l) {
 long bignum_to_long(LP b) {
   long i;
 
-  i = mpz_get_si(REMOVE_TAG(b));
+  i = mpz_get_si((mpz_srcptr) REMOVE_TAG(b));
   return(i);
 }
 
 unsigned long bignum_to_ulong(LP b) {
   unsigned long l;
 
-  l = mpz_get_si(REMOVE_TAG(b));
+  l = mpz_get_si((mpz_srcptr) REMOVE_TAG(b));
   return(l);
 }
 
@@ -264,7 +263,6 @@ LP multiply_overflow_handler(LP x, LP y) {
   mpz_clear(mpy);
   return(normalize_bignum(mpz));
 }
-
 
 LP add(LP x, LP y) {
   mpz_t mpx;
