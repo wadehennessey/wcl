@@ -32,8 +32,6 @@ LP new_closure(LP code, LP env) {
                (alloc_bytes(sizeof(CLOSURE),TYPE_CLOSURE) - 1);
   // printf("alloc trampoline %x with env %x\n", trampoline, env);
 
-#define PTR_TO_INT(p) ((long)(p) & 0xFFFFFFFF)
-  
 #ifdef linux_pc
 #if (__WORDSIZE == 64)
   /*  Put OE addr into $r1, then low and high env addr into OE.

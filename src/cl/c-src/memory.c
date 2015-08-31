@@ -734,7 +734,7 @@ void register_symbols(char *package_name, unsigned long *symbols) {
   ptr->package_name = package_name;
   ptr->symbols = symbols;
   if (!delay_symbol_interns) {
-   intern_symbols(symbols, package_name);
+    intern_symbols(package_name, symbols);
   }
   ptr->next = registered_symbols;
   registered_symbols = ptr;
@@ -756,7 +756,7 @@ void scan_static_symbols() {
 
   for (ptr = registered_symbols; ptr != 0; ptr = ptr->next) {
     for (syms = ptr->symbols; *syms != 0; syms = syms + 1) {
-      move_sub_objects(*syms);
+      move_sub_objects((LP) *syms);
     }
   }
 }
@@ -932,7 +932,7 @@ void move_sub_objects(LP ptr) {
       old_oe_low32 = CLOSURE_ENV_LOW32((ptr - 1));
       old_oe_high32 = CLOSURE_ENV_HIGH32((ptr - 1));
       old_oe = (old_oe_high32 << 32) | old_oe_low32;
-      new_oe = (unsigned long) move_object(old_oe);
+      new_oe = (unsigned long) move_object((LP) old_oe);
       CLOSURE_ENV_LOW32((ptr - 1)) = (unsigned int) new_oe;
       CLOSURE_ENV_HIGH32((ptr - 1)) = (unsigned int) (new_oe >> 32);
     }
@@ -998,7 +998,7 @@ void move_sub_objects(LP ptr) {
       long i;
       long len = LEN_FIELD(ptr) * sizeof(long);
       for (i = 0; i < len; i = i + sizeof(long)) {
-	DEREF(ptr + i) = (LD) move_object(DEREF(ptr + i));
+	DEREF(ptr + i) = (LD) move_object((LP) DEREF(ptr + i));
       }
     }
     break;

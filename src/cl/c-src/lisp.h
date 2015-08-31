@@ -172,6 +172,8 @@ deref <enum other type.... >     1: other
 #define NEW_PROCEDURE alloc_words(1,TYPE_PROCEDURE)
 #define NEW_CONS      alloc_words(2,TYPE_CONS)
 
+#define PTR_TO_INT(p) ((long)(p) & 0xFFFFFFFF)
+
 /* Closure allocation. */
 
 #define OPEN_PROCEDURE_FLAG 1

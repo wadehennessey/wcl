@@ -1,10 +1,7 @@
 #  (C) Copyright 1990 - 2014 by Wade L. Hennessey. All rights reserved. 
 
-# HEY! try to compile cleanly without -w
 # make clean; make linux-pc-64
 # HEY! Put -O2 back in 
-WCC = gcc -w -xc -pipe -g -fPIC -c
-
 CC = gcc -xc -pipe -g -fPIC -c
 
 linux-pc: x86 linux-pc-socket.o linux-pc-cache-flush.o linux-interrupts.o
@@ -48,7 +45,7 @@ eval-code.o:	lisp.h eval-code.c
 	$(CC) -c -g  eval-code.c
 
 memory.o:	lisp.h memory.c
-	$(WCC) -c    memory.c
+	$(CC) -c    memory.c
 
 chars.o:	lisp.h chars.c
 	$(CC) -c    chars.c
