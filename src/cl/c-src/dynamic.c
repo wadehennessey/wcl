@@ -44,7 +44,8 @@ int unwind(UW_POINT *dest, LP value) {
   while (uw_top != NULL) {
     if  ((UW_POINT *) dest == uw_top) {	/* Why is the cast needed? */
       uw_top->single_throw_value = value;
-      longjmp(uw_top->c_env,(int) value); /* done */
+      // use single_throw_value
+      longjmp(uw_top->c_env, 2); /* done */
     } else {
       switch (uw_top->type) {
 
@@ -94,5 +95,5 @@ LP dynamic_go(LP tag) {
   UW_POINT *dest;
 
   dest = find_uw_tag(tag,UW_DYNAMIC_TAG);
-  unwind(dest,1);
+  unwind(dest, (LP) 1);
 }

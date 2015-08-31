@@ -24,7 +24,7 @@ common:	 chars.o arith.o  array.o generic-loader.o  \
 	 dynamic.o misc.o eval-code.o
 
 dynamic.o: lisp.h
-	$(WCC) -c    dynamic.c
+	$(CC) -c    dynamic.c
 
 time.o:	lisp.h
 	$(CC) -c    time.c
@@ -63,7 +63,7 @@ io.o:		lisp.h io.c
 	$(CC) -c    io.c
 
 closure.o:	lisp.h closure.c
-	$(WCC) -c    closure.c
+	$(CC) -c    closure.c
 
 linux-pc-socket.o:	lisp.h 
 	$(CC) -c    -DUNIXCONN -o socket.o linux-pc-socket.c
