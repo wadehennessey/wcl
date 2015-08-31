@@ -45,8 +45,8 @@ int connect_to_server (char *host, int display) {
 #ifdef UNIXCONN
   struct sockaddr_un unaddr;	/* UNIX socket address. */
 #endif
-  extern char *getenv();
-  extern struct hostent *gethostbyname();
+  char *getenv();
+  struct hostent *gethostbyname();
   int fd;				/* Network socket */
   {
 #ifdef UNIXCONN

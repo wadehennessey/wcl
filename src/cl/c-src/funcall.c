@@ -3,9 +3,9 @@
 #include "lisp.h"
 #include <stdio.h>
 
-extern LP p_lsp_COERCE_2DTO_2DFUNCTION (ARGC argc, LP procedure);
-extern LP ubf_handler (ARGC argc, ...);
-extern LP apply_function_1 (ARGC argc, LP (*func) (ARGC dummy, ...),
+LP p_lsp_COERCE_2DTO_2DFUNCTION (ARGC argc, LP procedure);
+LP ubf_handler (ARGC argc, ...);
+LP apply_function_1 (ARGC argc, LP (*func) (ARGC dummy, ...),
 				  LP a[],int num_args);
 
 LP apply_function(ARGC argc, LP procedure, int spread_last_p, va_list ap) {

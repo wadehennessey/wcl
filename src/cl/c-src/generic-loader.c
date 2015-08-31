@@ -2,8 +2,8 @@
 
 #include "lisp.h"
 
-extern LP p_lsp_INTERN(int argc, LP name, LP package);
-extern LP p_lsp_MAKE_2DSYMBOL(int argc, LP name);
+LP p_lsp_INTERN(int argc, LP name, LP package);
+LP p_lsp_MAKE_2DSYMBOL(int argc, LP name);
 
 #define DIGIT_TO_INT(digit) \
   ((digit <= '9') ? (digit - '0') : 10 + (digit - 'A'))

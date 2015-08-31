@@ -547,32 +547,38 @@ extern UW_POINT *uw_top;
 extern PROCEDURE ubf_procedure;
 extern UBV ubv_marker;
 extern LP OE;
-extern LP p_lsp_APPLY(ARGC argc, LP procedure, ...);
-extern LP p_lsp_FUNCALL(ARGC argc, LP procedure, ...);
+LP p_lsp_APPLY(ARGC argc, LP procedure, ...);
+LP p_lsp_FUNCALL(ARGC argc, LP procedure, ...);
 
-extern LP alloc_memory(long len, long word_size, long type);
-extern LP alloc_doubles(long len, long tag);
-extern LP alloc_words(long len, long tag);
-extern LP alloc_shorts(long size, long tag);
-extern LP alloc_bytes(long len, long tag);
-extern LP alloc_bits(long len, long tag);
+LP alloc_memory(long len, long word_size, long type);
+LP alloc_doubles(long len, long tag);
+LP alloc_words(long len, long tag);
+LP alloc_shorts(long size, long tag);
+LP alloc_bytes(long len, long tag);
+LP alloc_bits(long len, long tag);
 
-extern LP new_closure(LP code, LP env);
-extern LP new_oe(long len);
-extern LP new_float(double n);
-extern LP new_foreign_ptr(LP type, LP ptr);
-extern void lisp_debug();
-extern LP lookup_keyword(LP kwd,LP l);
-extern double float_significand(double f);
-extern double bignum_to_double(LP x);
-extern LP long_to_bignum(long i);
-extern LP ulong_to_bignum(unsigned long i);
-extern long bignum_to_long(LP b);
-extern unsigned long bignum_to_ulong(LP b);
-extern LP c_to_lisp_vector(char* vector,
+LP new_closure(LP code, LP env);
+LP new_oe(long len);
+LP new_float(double n);
+LP new_foreign_ptr(LP type, LP ptr);
+void lisp_debug();
+LP lookup_keyword(LP kwd,LP l);
+double float_significand(double f);
+double bignum_to_double(LP x);
+LP long_to_bignum(long i);
+LP ulong_to_bignum(unsigned long i);
+long bignum_to_long(LP b);
+unsigned long bignum_to_ulong(LP b);
+LP c_to_lisp_vector(char* vector,
 			   long element_type_tag, long len);
-extern LP c_to_lisp_string(char* string);
-extern LP lisp_to_c_array(LP a);
+LP c_to_lisp_string(char* string);
+LP lisp_to_c_array(LP a);
 
-extern LP p_lsp_COERCE_2DTO_2DFUNCTION(ARGC argc, LP v_F_0);
-extern LP copy_c_to_lisp_string(char *str);
+LP p_lsp_COERCE_2DTO_2DFUNCTION(ARGC argc, LP v_F_0);
+LP copy_c_to_lisp_string(char *str);
+
+void wna(ARGC actual, ARGC desired);
+void wna_low(ARGC actual, ARGC min);
+void wna_high(ARGC actual, ARGC max);
+void arg_limit_exceeded(int count);
+
