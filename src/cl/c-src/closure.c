@@ -32,7 +32,8 @@ LP new_closure(LP code, LP env) {
                (alloc_bytes(sizeof(CLOSURE),TYPE_CLOSURE) - 1);
   // printf("alloc trampoline %x with env %x\n", trampoline, env);
 
-
+#define PTR_TO_INT(p) ((long)(p) & 0xFFFFFFFF)
+  
 #ifdef linux_pc
 #if (__WORDSIZE == 64)
   /*  Put OE addr into $r1, then low and high env addr into OE.
@@ -43,7 +44,7 @@ LP new_closure(LP code, LP env) {
   trampoline->movl1[0] = 0x41;  
   trampoline->movl1[1] = 0xc7;
   trampoline->movl1[2] = 0x03;
-  (*(unsigned int *)(trampoline->env_low32)) = (unsigned int) env;
+  (*(unsigned int *)(trampoline->env_low32)) = PTR_TO_INT(env);
   (*(unsigned int *)(trampoline->movl2)) = 0x0443c741;
   (*(unsigned int *)(trampoline->env_high32)) = ((unsigned int) \
 						 (((unsigned long) env) \
