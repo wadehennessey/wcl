@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include "closure.h"
 #include "limits.h"
 
@@ -1148,7 +1149,9 @@ void scan_pages(long start_page) {
 
 void full_gc() {
   long start_page; 
-
+  struct timeval start_tv, end_tv, elapsed_tv;
+  
+  gettimeofday(&start_tv, 0);
   if (inside_gc_flag != 0) {
     printf("\nGC called recursively, must be out of memory.\n");
     lisp_debug();
@@ -1169,9 +1172,11 @@ void full_gc() {
   current_generation = next_generation;
   inside_gc_flag = 0;
   gc_count = gc_count + 1;
-
-  printf("GC done, checking memory...");
+  gettimeofday(&end_tv, 0);
+  timersub(&end_tv, &start_tv, &elapsed_tv);
+  printf("GC elapsed_tv is %d.%06d\n", elapsed_tv.tv_sec, elapsed_tv.tv_usec);
   check_memory(0,frontier_page,0);
+  printf("GC done, checking memory...");
   printf("done\n\n");
 }
 
