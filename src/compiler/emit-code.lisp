@@ -877,6 +877,7 @@
 (defun convert-lisp->c (type arg tree)
   (if (and (constant-p tree)
 	   (fixnump (constant-data tree))
+	   (typep type 'c-type-info)
 	   (not (null (c-type-info-constant-to-c type))))
       (format nil "~D" (funcall (c-type-info-constant-to-c type)
 				(constant-data tree)))

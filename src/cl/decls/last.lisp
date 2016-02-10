@@ -532,7 +532,10 @@
   seed
   data)
 
-(defvar *random-state* (make-random-state t))
+;;; HEY! This causes a memory overwrite that hasn't been debugged and fixed
+;;; yet, so we comment it out for now and leave *random-state* unusable
+;;; (defvar *random-state* (make-random-state t))
+(defvar *random-state* nil)
 
 (defstruct lambda-list
   requireds
