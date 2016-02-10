@@ -238,7 +238,7 @@
   (- (get-universal-time) *link-start-time*))
 
 (defun link-msg (msg)
-  (format t "~D seconds: ~A~%" (elapsed-link-time) msg))
+  (format t "~A~%" msg))
 
 (defun c-pathname (name)
   (merge-pathnames ".wcl" name))
