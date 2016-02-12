@@ -53,7 +53,7 @@
 			      (predicates-file (tmp-file-name
 						"preds.lisp") p?)
 			      (data-file (tmp-file-name "data.wcl") d?)
-			      (foreign-libs '("c" "m" "dl")))
+			      (foreign-libs '("c" "m" "dl" "pthread")))
   (unwind-protect
        (let* ((*link-start-time* (get-universal-time))
 	      (file-list (if (listp files) files (list files)))
