@@ -1,0 +1,14 @@
+this call overwrites at 495 count:
+
+t0 = ICALL(s_lsp_INITIALIZE_2DARRAY_2DFROM_2DCONTENTS) (MV_CALL(argc,3), v_A_0, v_UNDERLYING_2DARRAY_1, v_INITIAL_2DCONTENTS_5);
+
+p mcheck_check_all()
+
+-----------------------
+link-msg elapsed-link-time has gibberesh printed
+
+p (char) ((struct character *) (v_CHAR_1 - 1))->char_code
+
+
+Need to align closure OE pointer on an 8 byte boundry or use metadata to scan.
+
