@@ -8,6 +8,9 @@
 #include <sys/time.h>
 #include "closure.h"
 #include "limits.h"
+#include "mcheck.h"
+
+#include "/home/wade/rtgc/allocate.h"
 
 #ifdef x86
 #define NUMBER_OF_REGS_TO_SCAN  8
@@ -255,9 +258,57 @@ void allocate_pages(long n) {
   }
 }      
 
+#if RTGC
 /* All memory allocation goes through this function and c_cons.
    However, these are not safe wrt to interrupts.
    */
+#define MALLOC_SAFETY_BYTES 0
+
+int safe_malloc_count = 0;
+
+void *safe_malloc(size_t size) {
+  if (0 == safe_malloc_count) {
+    printf("MALLOC_SAFETY_BYTES is %d\n", MALLOC_SAFETY_BYTES);
+  }
+  safe_malloc_count = safe_malloc_count + 1;
+  //mcheck_check_all();
+  //void *ptr = malloc(size + MALLOC_SAFETY_BYTES);
+  void *ptr = RTallocate(RTpointers, size);
+  if (0 == ptr) {
+    printf("safe malloc failed!\n");
+    lisp_debug();
+  }
+  return(ptr);
+}
+
+LP alloc_words_1(long num_words, long tag, long len_field) {
+  long total_num_bytes;
+  LP base_ptr;
+  LP ptr;
+
+  total_num_bytes = (num_words * sizeof(long)) + sizeof(long);
+  base_ptr = safe_malloc(total_num_bytes);
+  ptr = base_ptr + sizeof(long) + 1;
+  LHEADER(ptr) = (len_field << 8) + tag;
+  return(ptr);
+}
+
+/* Save a few instructions consing. Not sure if this is worth
+   duplicating the allocation code.  */
+LP c_cons(LP x, LP y) {
+  LP base_ptr;
+  LP ptr;
+
+  /* Install header BEFORE incrementing frontier so we don't have
+     a pointer to bogus memory  */
+  base_ptr = safe_malloc(sizeof(struct cons));
+  ptr = base_ptr + sizeof(long) + 1;
+  LHEADER(ptr) = (2 << 8) + TYPE_CONS;
+  LDREF(ptr,CONS,car) = x;
+  LDREF(ptr,CONS,cdr) = y;
+  return(ptr);
+}
+#else
 LP alloc_words_1(long num_words, long tag, long len_field) {
   long total_num_bytes;
   LP ptr;
@@ -297,6 +348,7 @@ LP c_cons(LP x, LP y) {
   remaining_page_bytes = remaining_page_bytes - sizeof(struct cons);
   return(ptr);
 }
+#endif
      
 LP alloc_words(long num_words, long tag) {
   return(alloc_words_1(num_words,tag,num_words));
@@ -504,7 +556,7 @@ void init_memory_allocator(long dynamic_kbytes, long static_kbytes) {
   current_generation = 1;
   next_generation = 1;
   pageinfo = (struct page_info *)
-             malloc(sizeof(struct page_info) * total_pages);
+    malloc(sizeof(struct page_info) * (total_pages + 1));
   for (i = 0; i <= total_pages; i++) {
     pageinfo[i].generation = 0;
     pageinfo[i].contig_flag = 0;

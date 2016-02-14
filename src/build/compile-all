@@ -1,5 +1,6 @@
 #!/bin/tcsh
-setenv LD_LIBRARY_PATH "../../dist-lib"
+setenv LD_LIBRARY_PATH "../../dist-lib:/home/wade/rtgc"
+#../../dist-bin/wcl -m 1000000 < compile-cl-script.lisp
 ../../dist-bin/wcl -m 24000 < compile-cl-script.lisp
 #../../bin/wcl -m 24000 < compile-clx-script.lisp
 

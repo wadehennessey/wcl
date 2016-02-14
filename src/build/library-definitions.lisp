@@ -26,7 +26,7 @@
   (comf "../main/eval")
   (link-executable "../main/eval"
 		   :data-file "/tmp/eval-data.c"
-		   ;; :predicates-file "/tmp/eval-preds.c"
+		   :predicates-file "/tmp/eval-preds.c"
 		   :main-function 'lisp::lmain
 		   :output "../../bin/eval"))
 

@@ -18,6 +18,8 @@
 (list-all-packages)
 (print "ansi-loop")
 
+;;; (trace shell)
+;;; (shell "date")
 
 (make-cl-library)
 (make-eval-bin)

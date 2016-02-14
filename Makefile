@@ -32,7 +32,6 @@ rebuild:
 	(cd src/build; ./compile-all)
 
 clean:
-	find . -name "*.*bin*" -exec rm -f {} \;
 	find . -name "*.o" -exec rm -f {} \;
 	find . -name "*[~,#]" -exec rm -f {} \;
 	rm -f src/cl/functions/*.wcl

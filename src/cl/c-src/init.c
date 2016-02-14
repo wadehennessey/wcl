@@ -6,17 +6,20 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#if RTGC
+#include "/home/wade/rtgc/allocate.h"
+#endif
 
 extern char *optarg;
 typedef void (*sighandler_t)(int);
 void signal_handler(int signal);
-
 void init_memory_allocator(int dynamic_memory_size, int static_memory_size);
 void init_run_time();
 void init_real_time();
 void init_arith();
-  
 sighandler_t signal(int signum, sighandler_t handler);
+LP p_lsp_START_2DAPPLICATION(ARGC argc, LP v_MAIN_2DFUNCTION_0);
+
 
 #define DEFAULT_DYNAMIC_MEMORY_SIZE 8192
 #define DEFAULT_STATIC_MEMORY_SIZE 512
@@ -76,7 +79,11 @@ void start_initialization(int argc, char *argv[],
     get_memory_size(argc,argv,"m:",'m',DEFAULT_DYNAMIC_MEMORY_SIZE);
   static_memory_size = 
     get_memory_size(argc,argv,"s:",'s',DEFAULT_STATIC_MEMORY_SIZE);
+#if RTGC
+  RTinit_heap(1L << 30, 0);
+#else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
+#endif
   init_run_time();
   init_real_time();
   init_arith();
@@ -84,3 +91,16 @@ void start_initialization(int argc, char *argv[],
   unbuffer_interactive_streams();
 }
 
+static
+void *start_main_thread(void *start_func) {
+  p_lsp_START_2DAPPLICATION(1,start_func);
+}
+
+void init_wcl_threads(LP start_func) {
+#if RTGC
+  new_thread(&start_main_thread, (void *) start_func);
+  while (1);
+#else
+  p_lsp_START_2DAPPLICATION(1,start_func);
+#endif
+}

@@ -156,7 +156,8 @@
       (emit-k "~A();~%" (library-init-thunk lib)))
     (dolist (lisp-thunk application-lisp-thunks)
       (emit-k "~A(0);~%" (lisp->c-proc-name lisp-thunk)))
-    (emit-k "p_lsp_START_2DAPPLICATION(1,LREF(~A));~%"
+    ;;; (emit-k "p_lsp_START_2DAPPLICATION(1,LREF(~A));~%"
+    (emit-k "init_wcl_threads(LREF(~A));~%"
 	    (lisp->c-symbol-name main-function))
     (emit-k "}~%"))
   (link-msg "Compiling data file")
@@ -174,7 +175,7 @@
 (defun ld-executable (output-file files preds-file data-file unix-libs)
   (invoke-linker
        (format nil
-	       "~A -o ~A ~A ~A ~{~A ~} -L~A/lib ~{-l~A ~}"
+	       "~A -o ~A ~A ~A ~{~A ~} -L~A/lib ~{-l~A ~} -L/home/wade/rtgc -lrtgc"
 	       (if *profile?* "-p " "")
 	       (namestring output-file)
 	       (namestring (merge-pathnames ".o" preds-file))

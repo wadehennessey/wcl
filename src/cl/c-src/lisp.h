@@ -4,8 +4,9 @@
 
 #ifdef linux_pc
 #define x86
-//#define LITTLE_ENDIAN
 #endif
+
+//#define RTGC 1
 
 #include <stdarg.h>
 #include <setjmp.h> 
@@ -581,4 +582,4 @@ void wna(ARGC actual, ARGC desired);
 void wna_low(ARGC actual, ARGC min);
 void wna_high(ARGC actual, ARGC max);
 void arg_limit_exceeded(int count);
-
+void init_wcl_threads(LP start_func);
