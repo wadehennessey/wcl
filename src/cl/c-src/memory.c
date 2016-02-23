@@ -264,16 +264,21 @@ void allocate_pages(long n) {
    */
 #define MALLOC_SAFETY_BYTES 0
 
-int safe_malloc_count = 0;
+int safe_malloc_count = 8;
 
-void *safe_malloc(size_t size) {
+void *safe_malloc(size_t size, long tag) {
   if (0 == safe_malloc_count) {
     printf("MALLOC_SAFETY_BYTES is %d\n", MALLOC_SAFETY_BYTES);
   }
   safe_malloc_count = safe_malloc_count + 1;
-  //mcheck_check_all();
-  //void *ptr = malloc(size + MALLOC_SAFETY_BYTES);
-  void *ptr = RTallocate(RTpointers, size);
+  void *ptr;
+  if (tag != TYPE_CLOSURE) {    
+    ptr = RTallocate(RTpointers, size);
+  } else {
+    // cause storage class to be SC_METADATA
+    ptr = RTallocate((void *) tag, size);
+  }
+  
   if (0 == ptr) {
     printf("safe malloc failed!\n");
     lisp_debug();
@@ -287,7 +292,7 @@ LP alloc_words_1(long num_words, long tag, long len_field) {
   LP ptr;
 
   total_num_bytes = (num_words * sizeof(long)) + sizeof(long);
-  base_ptr = safe_malloc(total_num_bytes);
+  base_ptr = safe_malloc(total_num_bytes, tag);
   ptr = base_ptr + sizeof(long) + 1;
   LHEADER(ptr) = (len_field << 8) + tag;
   return(ptr);
@@ -301,12 +306,43 @@ LP c_cons(LP x, LP y) {
 
   /* Install header BEFORE incrementing frontier so we don't have
      a pointer to bogus memory  */
-  base_ptr = safe_malloc(sizeof(struct cons));
+  base_ptr = safe_malloc(sizeof(struct cons), TYPE_CONS);
   ptr = base_ptr + sizeof(long) + 1;
   LHEADER(ptr) = (2 << 8) + TYPE_CONS;
   LDREF(ptr,CONS,car) = x;
   LDREF(ptr,CONS,cdr) = y;
   return(ptr);
+}
+
+// Put these in rtgc/allocate.h? Call file RTallocate.h?
+//typedef unsigned long * LPTR;
+typedef unsigned char * BPTR;
+void RTscan_memory_segment(BPTR *low, BPTR *high);
+
+void scan_wcl_static_symbols_and_OE() {
+  SYMBOL_RECORD *ptr;
+  unsigned long *syms;
+
+  for (ptr = registered_symbols; ptr != 0; ptr = ptr->next) {
+    for (syms = ptr->symbols; *syms != 0; syms = syms + 1) {
+      BPTR *low = (BPTR *) ((*syms) - 1);
+      BPTR *high =  (BPTR *) ((BPTR) low + (sizeof(struct symbol) - 
+					    sizeof(unsigned long)));
+      RTscan_memory_segment(low, high);
+    }
+  }
+  BPTR *low =  &OE;
+  BPTR *high = (BPTR *) ((BPTR) low + sizeof(OE));
+  RTscan_memory_segment(low, high);
+  // wait here for now
+  // while (1);
+}
+
+void *wcl_get_closure_env(LP ptr) {
+  unsigned int oe_low32 = CLOSURE_ENV_LOW32(ptr);
+  unsigned long oe_high32 = CLOSURE_ENV_HIGH32(ptr);
+  unsigned long oe = (oe_high32 << 32) | oe_low32;
+  return((void *) oe);
 }
 #else
 LP alloc_words_1(long num_words, long tag, long len_field) {
@@ -1231,11 +1267,3 @@ void full_gc() {
   printf("GC done, checking memory...");
   printf("done\n\n");
 }
-
-
-
-
-
-
-
-

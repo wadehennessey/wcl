@@ -19,7 +19,7 @@ void init_real_time();
 void init_arith();
 sighandler_t signal(int signum, sighandler_t handler);
 LP p_lsp_START_2DAPPLICATION(ARGC argc, LP v_MAIN_2DFUNCTION_0);
-
+void rtgc_loop();
 
 #define DEFAULT_DYNAMIC_MEMORY_SIZE 8192
 #define DEFAULT_STATIC_MEMORY_SIZE 512
@@ -80,7 +80,7 @@ void start_initialization(int argc, char *argv[],
   static_memory_size = 
     get_memory_size(argc,argv,"s:",'s',DEFAULT_STATIC_MEMORY_SIZE);
 #if RTGC
-  RTinit_heap(1L << 30, 0);
+  RTinit_heap(1L << 28, 0);
 #else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
 #endif
@@ -96,10 +96,14 @@ void *start_main_thread(void *start_func) {
   p_lsp_START_2DAPPLICATION(1,start_func);
 }
 
+void scan_wcl_static_symbols_and_OE();
+
 void init_wcl_threads(LP start_func) {
 #if RTGC
   new_thread(&start_main_thread, (void *) start_func);
-  while (1);
+  RTregister_root_scanner(scan_wcl_static_symbols_and_OE);
+  //sleep(1);
+  rtgc_loop();
 #else
   p_lsp_START_2DAPPLICATION(1,start_func);
 #endif

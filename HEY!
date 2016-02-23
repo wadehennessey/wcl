@@ -11,3 +11,18 @@ start with static_allocate just does regular alloc?
 
 Need to align closure OE pointer on an 8 byte boundry or use metadata to scan.
 
+pass in RTscan_memory as arg to root scanner, eliminate extern RTscan_memory
+
+Eliminate black_count_lock - replace with black_scanned and black_alloc counts.
+
+write group_verifier and all_groups_verifier.
+
+write group_verifier first, check group 32 on every alloc an bin search
+
+LP copy_c_to_lisp_string(char *str) was writing 1 byte too far! - changed it.
+    try adding back more padding!
+
+Need to alloc closures with special md data
+
+
+HEY! fix identify_free_pages to work with obj > 1 page in len

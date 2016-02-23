@@ -304,7 +304,7 @@ LP copy_c_to_lisp_string(char *str) {
 
    len = strlen(str) + 1;
    ptr = alloc_bytes(len,TYPE_SIMPLE_STRING);
-   for (i = 0; i <= len; i++) {
+   for (i = 0; i < len; i++) {
      *(REMOVE_TAG(ptr + i)) = *(str + i);
    }
    LHEADER(ptr) = ((len - 1) << 8) + TAG(ptr);
