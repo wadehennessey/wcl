@@ -5,24 +5,18 @@ t0 = ICALL(s_lsp_INITIALIZE_2DARRAY_2DFROM_2DCONTENTS) (MV_CALL(argc,3), v_A_0, 
 p mcheck_check_all()
 
 -----------------------
-deal with static allocation in rtalloc and write_barrier
-
-start with static_allocate just does regular alloc?
-
-Need to align closure OE pointer on an 8 byte boundry or use metadata to scan.
+start with static_allocate just does regular alloc
+BUT, static allocation doesn't seem to be used any more.
 
 pass in RTscan_memory as arg to root scanner, eliminate extern RTscan_memory
 
-Eliminate black_count_lock - replace with black_scanned and black_alloc counts.
+no need to apply write barrier to closures - env pointer is never updated after
+closure is created.
 
-write group_verifier and all_groups_verifier.
+write barrier here:
+in compiler-init.lisp:
 
-write group_verifier first, check group 32 on every alloc an bin search
+  (defprimitive %32bit-def ((x t) (i int) (y t) => ()) ; unsigned
+    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" x i y))
 
-LP copy_c_to_lisp_string(char *str) was writing 1 byte too far! - changed it.
-    try adding back more padding!
-
-Need to alloc closures with special md data
-
-
-HEY! fix identify_free_pages to work with obj > 1 page in len
+    (emit-c "(LP) write_barrier(&(DEREF(~A + ~A * sizeof(LP))),(LD) ~A)" x i y))

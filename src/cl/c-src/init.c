@@ -80,6 +80,7 @@ void start_initialization(int argc, char *argv[],
   static_memory_size = 
     get_memory_size(argc,argv,"s:",'s',DEFAULT_STATIC_MEMORY_SIZE);
 #if RTGC
+  RTatomic_gc = 1;
   RTinit_heap(1L << 28, 0);
 #else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
