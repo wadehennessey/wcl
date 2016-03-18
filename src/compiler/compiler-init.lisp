@@ -472,9 +472,13 @@
   (defprimitive %structure-elt ((s t) (i int) => (v t))
     (emit-c "(LP) DEREF(~A + ~A * sizeof(LP))" s i))
 
-  (defprimitive %set-structure-elt ((s t) (i int) (value t) => ())
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" s i value))
+;;;  (defprimitive %set-structure-elt ((s t) (i int) (value t) => ())
+;;;    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" s i value))
 
+  (defprimitive %set-structure-elt ((s t) (i int) (value t) => ())
+    (emit-c "(LP) wcl_wb(&(DEREF(~A + ~A * sizeof(LP))),(LD) ~A)" s i value))
+
+  
   ;; New accessors
   
   (defprimitive %unsigned-8bit-ref ((x t) (i int) => (v int))
@@ -611,9 +615,10 @@
   (defprimitive %symref ((sym t) (i int) => (v t))
     (emit-c "(LP) DEREF(~A + ~A * sizeof(LP))" sym i))
 
+;;;  (defprimitive %symdef ((sym t) (i int) (y t) => ())
+;;;    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" sym i y))
   (defprimitive %symdef ((sym t) (i int) (y t) => ())
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)"
-	    sym i y))
+    (emit-c "(LP) wcl_wb(&(DEREF(~A + ~A * sizeof(LP))), (LD) ~A)" sym i y))
   
   )
 
