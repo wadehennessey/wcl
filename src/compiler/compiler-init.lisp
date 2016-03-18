@@ -612,9 +612,12 @@
   (defprimitive %makunbound ((sym t) => ())
     (emit-c "wcl_wb(&(LDREF(~A,SYMBOL,value)), UBV_MARKER)" sym))
   
-  (defprimitive %fmakunbound ((sym t) => ())
-    (emit-c "(LDREF(~A,SYMBOL,function) = (LP) LREF(ubf_procedure))" sym))
+;;;  (defprimitive %fmakunbound ((sym t) => ())
+;;;    (emit-c "(LDREF(~A,SYMBOL,function) = (LP) LREF(ubf_procedure))" sym))
 
+  (defprimitive %fmakunbound ((sym t) => ())
+    (emit-c "wcl_wb(&(LDREF(~A,SYMBOL,function)),(LP) LREF(ubf_procedure))" sym))
+  
   (defprimitive %symref ((sym t) (i int) => (v t))
     (emit-c "(LP) DEREF(~A + ~A * sizeof(LP))" sym i))
 
