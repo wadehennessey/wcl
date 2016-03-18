@@ -606,9 +606,12 @@
   (defprimitive %fboundp ((sym t) => (flag if-test))
     (emit-c "(LDREF(~A,SYMBOL,function) != (LP) LREF(ubf_procedure))" sym))
 
-  (defprimitive %makunbound ((sym t) => ())
-    (emit-c "LDREF(~A,SYMBOL,value) = UBV_MARKER" sym))
+;;;  (defprimitive %makunbound ((sym t) => ())
+;;;    (emit-c "LDREF(~A,SYMBOL,value) = UBV_MARKER" sym))
 
+  (defprimitive %makunbound ((sym t) => ())
+    (emit-c "wcl_wb(&(LDREF(~A,SYMBOL,value)), UBV_MARKER)" sym))
+  
   (defprimitive %fmakunbound ((sym t) => ())
     (emit-c "(LDREF(~A,SYMBOL,function) = (LP) LREF(ubf_procedure))" sym))
 
