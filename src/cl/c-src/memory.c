@@ -258,7 +258,15 @@ void allocate_pages(long n) {
   }
 }      
 
+
+
+
 #if RTGC
+LP wcl_wb(LP *lhs_address, LP rhs) {
+  //return(*lhs_address = rhs);
+  return(RTwrite_barrier(lhs_address, rhs));
+}    
+
 /* All memory allocation goes through this function and c_cons.
    However, these are not safe wrt to interrupts.
    */
@@ -345,6 +353,10 @@ void *wcl_get_closure_env(LP ptr) {
   return((void *) oe);
 }
 #else
+LP wcl_wb(LP *lhs_address, LP rhs) {
+    return(*lhs_address = rhs);
+}    
+
 LP alloc_words_1(long num_words, long tag, long len_field) {
   long total_num_bytes;
   LP ptr;

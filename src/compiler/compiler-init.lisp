@@ -533,8 +533,11 @@
   (defprimitive %32bit-ref ((x t) (i int) => (v t)) ; unsigned
     (emit-c "(LP) DEREF(~A + ~A * sizeof(LP))" x i))
 
+;;;  (defprimitive %32bit-def ((x t) (i int) (y t) => ()) ; unsigned
+;;;    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" x i y))
+
   (defprimitive %32bit-def ((x t) (i int) (y t) => ()) ; unsigned
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" x i y))
+    (emit-c "(LP) (wcl_wb(&(DEREF(~A + ~A * sizeof(LP))),(LD) ~A))" x i y))
 
 ;  (defprimitive %signed-32bit-ref ((x t) (i int) => (v int))
 ;   (emit-c "(LP) DEREF(~A + ~A * sizeof(LP))" x i))

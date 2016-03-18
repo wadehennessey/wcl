@@ -16,7 +16,22 @@ closure is created.
 write barrier here:
 in compiler-init.lisp:
 
-  (defprimitive %32bit-def ((x t) (i int) (y t) => ()) ; unsigned
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" x i y))
+! change %32bit-def to call wcl_wb
 
-    (emit-c "(LP) write_barrier(&(DEREF(~A + ~A * sizeof(LP))),(LD) ~A)" x i y))
+fix specific primitives to use wcl_wb
+
+
+
+  (defprimitive %set-structure-elt ((s t) (i int) (value t) => ())
+    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" s i value))
+
+  (defprimitive %makunbound ((sym t) => ())
+    (emit-c "LDREF(~A,SYMBOL,value) = UBV_MARKER" sym))
+
+  (defprimitive %fmakunbound ((sym t) => ())
+    (emit-c "(LDREF(~A,SYMBOL,function) = (LP) LREF(ubf_procedure))" sym))
+
+  (defprimitive %symdef ((sym t) (i int) (y t) => ())
+    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)"
+	    sym i y))
+

@@ -583,3 +583,4 @@ void wna_low(ARGC actual, ARGC min);
 void wna_high(ARGC actual, ARGC max);
 void arg_limit_exceeded(int count);
 void init_wcl_threads(LP start_func);
+LP wcl_wb(LP *lhs_address, LP rhs);
