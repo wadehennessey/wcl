@@ -14,24 +14,12 @@ no need to apply write barrier to closures - env pointer is never updated after
 closure is created.
 
 write barrier here:
-in compiler-init.lisp:
 
-! change %32bit-def to call wcl_wb
+does trampoline write into OE var need to  call wcl_wb? I think so
+SET_OE_SLOT needs to use wb
 
-fix specific primitives to use wcl_wb
-
-
-
-  (defprimitive %set-structure-elt ((s t) (i int) (value t) => ())
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)" s i value))
-
-  (defprimitive %makunbound ((sym t) => ())
-    (emit-c "LDREF(~A,SYMBOL,value) = UBV_MARKER" sym))
-
-  (defprimitive %fmakunbound ((sym t) => ())
-    (emit-c "(LDREF(~A,SYMBOL,function) = (LP) LREF(ubf_procedure))" sym))
-
-  (defprimitive %symdef ((sym t) (i int) (y t) => ())
-    (emit-c "(LP) (DEREF(~A + ~A * sizeof(LP)) = (LD) ~A)"
-	    sym i y))
+;;; I assume these are stack writes in emit-code.lisp:
+stack write? (emit-c "~A = NEW_OE(~D);~%"
+ditto: 	 (emit-c  "~A = OE;~%" oe-var))))))
+ditto:   (emit-c "~A = MAKE_CLOSURE(~A,~A);~%"
 
