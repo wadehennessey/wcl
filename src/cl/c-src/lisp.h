@@ -186,7 +186,10 @@ deref <enum other type.... >     1: other
 				 TYPE_PROCEDURE)
 #define NEW_OE(len) new_oe(len)
 #define GET_OE_SLOT(oe_var,i) (LP) (DEREF(oe_var + i * sizeof(long *)))
-#define SET_OE_SLOT(oe_var,i,value) (DEREF(oe_var + i * sizeof(long *)) = (LD) value)
+//#define SET_OE_SLOT(oe_var,i,value) (DEREF(oe_var + i * sizeof(long *)) = (LD) value)
+
+#define SET_OE_SLOT(oe_var,i,value) wcl_wb(&(DEREF(oe_var + i * sizeof(long *))),(LP) value)
+
 #define MAKE_CLOSURE(code,env) new_closure((LP) code,env)
 #define COERCE_TO_FUNCTION(x) p_lsp_COERCE_2DTO_2DFUNCTION(1,x)
 
@@ -583,4 +586,4 @@ void wna_low(ARGC actual, ARGC min);
 void wna_high(ARGC actual, ARGC max);
 void arg_limit_exceeded(int count);
 void init_wcl_threads(LP start_func);
-LP wcl_wb(LP *lhs_address, LP rhs);
+LP wcl_wb(LPL lhs_address, LP rhs);

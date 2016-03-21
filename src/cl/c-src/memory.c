@@ -262,7 +262,7 @@ void allocate_pages(long n) {
 
 
 #if RTGC
-LP wcl_wb(LP *lhs_address, LP rhs) {
+LP wcl_wb(LPL lhs_address, LP rhs) {
   //return(*lhs_address = rhs);
   return(RTwrite_barrier(lhs_address, rhs));
 }    
@@ -353,7 +353,7 @@ void *wcl_get_closure_env(LP ptr) {
   return((void *) oe);
 }
 #else
-LP wcl_wb(LP *lhs_address, LP rhs) {
+LP wcl_wb(LPL lhs_address, LP rhs) {
     return(*lhs_address = rhs);
 }    
 

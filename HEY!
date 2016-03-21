@@ -10,13 +10,10 @@ BUT, static allocation doesn't seem to be used any more.
 
 pass in RTscan_memory as arg to root scanner, eliminate extern RTscan_memory
 
-no need to apply write barrier to closures - env pointer is never updated after
-closure is created.
-
 write barrier here:
 
-does trampoline write into OE var need to  call wcl_wb? I think so
-SET_OE_SLOT needs to use wb
+trampoline writes ptr into OE var - should need wcl_wb call.
+Avoid this by adding OE scan to thread stack scans, treat it like the stack
 
 ;;; I assume these are stack writes in emit-code.lisp:
 stack write? (emit-c "~A = NEW_OE(~D);~%"
