@@ -15,8 +15,35 @@ write barrier here:
 trampoline writes ptr into OE var - should need wcl_wb call.
 Avoid this by adding OE scan to thread stack scans, treat it like the stack
 
-;;; I assume these are stack writes in emit-code.lisp:
-stack write? (emit-c "~A = NEW_OE(~D);~%"
-ditto: 	 (emit-c  "~A = OE;~%" oe-var))))))
-ditto:   (emit-c "~A = MAKE_CLOSURE(~A,~A);~%"
+OE needs to become thread local var if we want to run multiple threads
+would these cause it to be on the stack and thus get copied on stack
+or would we need to add OE value to thread state and copy that too?
+
+c-src
+-----
+arith.c
+array.c
+chars.c
+closure.c
+closure.h
+dynamic.c - done
+error.c - done
+eval-code.c - done
+funcall.c - done
+generic-apply.c - done
+generic-loader.c - done
+init.c - done
+io.c
+linux-interrupts.c - done
+linux-pc-socket.c - done
+lisp.h
+memory.c
+misc.c - done
+time.c - done
+
+x86-64-apply.s - done
+x86-64-integer-arith.s - done
+x86-apply.s - done - done
+x86-integer-arith.s - done
+
 
