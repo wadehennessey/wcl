@@ -97,12 +97,13 @@ void *start_main_thread(void *start_func) {
   p_lsp_START_2DAPPLICATION(1,start_func);
 }
 
-void scan_wcl_static_symbols_and_OE();
+void scan_wcl_static_symbols();
 
 void init_wcl_threads(LP start_func) {
 #if RTGC
   new_thread(&start_main_thread, (void *) start_func);
-  RTregister_root_scanner(scan_wcl_static_symbols_and_OE);
+  RTregister_root_scanner(scan_wcl_static_symbols);
+  RTregister_no_write_barrier_state(&OE, sizeof(OE));
   //sleep(1);
   rtgc_loop();
 #else

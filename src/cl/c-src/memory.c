@@ -267,9 +267,6 @@ LP wcl_wb(LPL lhs_address, LP rhs) {
   return(RTwrite_barrier(lhs_address, rhs));
 }    
 
-/* All memory allocation goes through this function and c_cons.
-   However, these are not safe wrt to interrupts.
-   */
 #define MALLOC_SAFETY_BYTES 0
 
 int safe_malloc_count = 8;
@@ -294,6 +291,8 @@ void *safe_malloc(size_t size, long tag) {
   return(ptr);
 }
 
+// All memory allocation goes through this function and c_cons.
+//   However, these are not safe wrt to interrupts.
 LP alloc_words_1(long num_words, long tag, long len_field) {
   long total_num_bytes;
   LP base_ptr;
@@ -327,7 +326,7 @@ LP c_cons(LP x, LP y) {
 typedef unsigned char * BPTR;
 void RTscan_memory_segment(BPTR *low, BPTR *high);
 
-void scan_wcl_static_symbols_and_OE() {
+void scan_wcl_static_symbols() {
   SYMBOL_RECORD *ptr;
   unsigned long *syms;
 
@@ -339,11 +338,6 @@ void scan_wcl_static_symbols_and_OE() {
       RTscan_memory_segment(low, high);
     }
   }
-  BPTR *low =  &OE;
-  BPTR *high = (BPTR *) ((BPTR) low + sizeof(OE));
-  RTscan_memory_segment(low, high);
-  // wait here for now
-  // while (1);
 }
 
 void *wcl_get_closure_env(LP ptr) {

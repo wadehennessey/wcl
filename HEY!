@@ -4,6 +4,7 @@ t0 = ICALL(s_lsp_INITIALIZE_2DARRAY_2DFROM_2DCONTENTS) (MV_CALL(argc,3), v_A_0, 
 
 p mcheck_check_all()
 
+cache info: /sys/devices/system/cpu/cpu0/cache/
 -----------------------
 start with static_allocate just does regular alloc
 BUT, static allocation doesn't seem to be used any more.
@@ -19,31 +20,29 @@ OE needs to become thread local var if we want to run multiple threads
 would these cause it to be on the stack and thus get copied on stack
 or would we need to add OE value to thread state and copy that too?
 
-c-src
------
-arith.c
-array.c
-chars.c
-closure.c
-closure.h
-dynamic.c - done
-error.c - done
-eval-code.c - done
-funcall.c - done
-generic-apply.c - done
-generic-loader.c - done
-init.c - done
-io.c
-linux-interrupts.c - done
-linux-pc-socket.c - done
-lisp.h
-memory.c
-misc.c - done
-time.c - done
 
-x86-64-apply.s - done
-x86-64-integer-arith.s - done
-x86-apply.s - done - done
-x86-integer-arith.s - done
+remaining c-src
+----------------
+memory.c
+
+array.c
+  set_simple_vref_1 wb for SIMPLE_VECTOR
+  initialize_array - writes for ELEMENT_TYPE_CHAR
+    only used to initalize new arrays?
+	
+
+lisp.h - partial - see UPDATE_* notes below
+
+Investigate these:
+/* These symbol macros are only used by the linker and do not need
+   to indirect through the symbol link. */
+#define UPDATE_VAR(sym,v,flag_pos) sym.value = (LP) v; \
+                                   SET_SYMBOL_FLAG(sym,flag_pos)
+	
+#define UPDATE_FUNC(sym,value) sym.function = LREF(value)
+
+/* HEY! This is broken, need to put func in hash table */    
+#define UPDATE_MACRO(sym,value,flag_pos) UPDATE_FUNC(sym,value); \
+                                         SET_SYMBOL_FLAG(sym,flag_pos)
 
 
