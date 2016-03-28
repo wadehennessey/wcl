@@ -26,10 +26,7 @@ remaining c-src
 memory.c
 
 array.c
-  set_simple_vref_1 wb for SIMPLE_VECTOR
-  initialize_array - writes for ELEMENT_TYPE_CHAR
-    only used to initalize new arrays?
-	
+  no wcl_wb for initialize_array - seems to only init new arrays
 
 lisp.h - partial - see UPDATE_* notes below
 

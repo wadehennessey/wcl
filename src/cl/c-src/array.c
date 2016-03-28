@@ -81,7 +81,9 @@ LP set_simple_vref_1(LP value, LP a, long i, int tag) {
     *((unsigned long *) (a - 1) + i) = INTEGER_TO_ULONG(value);
     break;
   case TYPE_SIMPLE_VECTOR:
-    *((unsigned long *) (a - 1) + i) = (unsigned long) value;
+    //*((unsigned long *) (a - 1) + i) = (unsigned long) value;
+    //(DEREF(a + i * sizeof(LP)) = (LD) value);
+    wcl_wb(&(DEREF(a + i * sizeof(LP))), (LP) value);
     break;
   case TYPE_SIMPLE_FLOAT_VECTOR:
     *((double *) (a - 1) + i) = RAW_FLOAT(value);
