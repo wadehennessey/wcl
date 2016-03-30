@@ -42,4 +42,14 @@ Investigate these:
 #define UPDATE_MACRO(sym,value,flag_pos) UPDATE_FUNC(sym,value); \
                                          SET_SYMBOL_FLAG(sym,flag_pos)
 
+change sleep before rtgc loop to volatile flag that wcl init is done
 
+check this:
+
+      // Use this code to enable large object recycle
+      // currently crashes after a bit of run time
+      GCPTR gcptr = (GCPTR) next_object;
+      return(GREENP(gcptr));
+      //return(0);
+
+crashes right now in rtwcl

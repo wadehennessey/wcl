@@ -80,7 +80,8 @@ void start_initialization(int argc, char *argv[],
   static_memory_size = 
     get_memory_size(argc,argv,"s:",'s',DEFAULT_STATIC_MEMORY_SIZE);
 #if RTGC
-  RTatomic_gc = 1;
+  //RTatomic_gc = 1;
+  RTatomic_gc = 0;
   RTinit_heap(1L << 28, 0);
 #else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
@@ -98,13 +99,15 @@ void *start_main_thread(void *start_func) {
 }
 
 void scan_wcl_static_symbols();
+extern int run_gc;
 
 void init_wcl_threads(LP start_func) {
 #if RTGC
   new_thread(&start_main_thread, (void *) start_func);
   RTregister_root_scanner(scan_wcl_static_symbols);
   RTregister_no_write_barrier_state(&OE, sizeof(OE));
-  //sleep(1);
+  sleep(1);
+  printf("Entering rtgc_loop\n");
   rtgc_loop();
 #else
   p_lsp_START_2DAPPLICATION(1,start_func);

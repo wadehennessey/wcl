@@ -1241,6 +1241,11 @@ void scan_pages(long start_page) {
   }
 }
 
+#if RTGC
+void full_gc() {
+  RTfull_gc();
+}
+#else
 void full_gc() {
   long start_page; 
   struct timeval start_tv, end_tv, elapsed_tv;
@@ -1273,3 +1278,4 @@ void full_gc() {
   printf("GC done, checking memory...");
   printf("done\n\n");
 }
+#endif
