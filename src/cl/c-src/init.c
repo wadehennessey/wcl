@@ -82,7 +82,7 @@ void start_initialization(int argc, char *argv[],
 #if RTGC
   //RTatomic_gc = 1;
   RTatomic_gc = 0;
-  RTinit_heap(1L << 28, 0);
+  RTinit_heap(1L << 25, 0);
 #else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
 #endif
