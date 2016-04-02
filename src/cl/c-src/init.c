@@ -106,8 +106,11 @@ void init_wcl_threads(LP start_func) {
   new_thread(&start_main_thread, (void *) start_func);
   RTregister_root_scanner(scan_wcl_static_symbols);
   RTregister_no_write_barrier_state(&OE, sizeof(OE));
+  // Avoid possible startup write barrier issues
+  // wcl_wb calls aren't in things like UPDATE_VAR and UPDATE_FUNCTION
+  // that are used at startup
   sleep(1);
-  printf("Entering rtgc_loop\n");
+  //printf("Entering rtgc_loop\n");
   rtgc_loop();
 #else
   p_lsp_START_2DAPPLICATION(1,start_func);

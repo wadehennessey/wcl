@@ -6,8 +6,7 @@
 #define x86
 #endif
 
-//#define RTGC 1
-#define RTGC 0
+#define RTGC 1
 
 #include <stdarg.h>
 #include <setjmp.h> 
