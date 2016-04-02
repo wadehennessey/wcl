@@ -258,12 +258,15 @@ void allocate_pages(long n) {
   }
 }      
 
-
-
+void *wcl_get_closure_env(LP ptr) {
+  unsigned int oe_low32 = CLOSURE_ENV_LOW32(ptr);
+  unsigned long oe_high32 = CLOSURE_ENV_HIGH32(ptr);
+  unsigned long oe = (oe_high32 << 32) | oe_low32;
+  return((void *) oe);
+}
 
 #if RTGC
 LP wcl_wb(LPL lhs_address, LP rhs) {
-  //return(*lhs_address = rhs);
   return(RTwrite_barrier(lhs_address, rhs));
 }    
 
@@ -339,16 +342,9 @@ void scan_wcl_static_symbols() {
     }
   }
 }
-
-void *wcl_get_closure_env(LP ptr) {
-  unsigned int oe_low32 = CLOSURE_ENV_LOW32(ptr);
-  unsigned long oe_high32 = CLOSURE_ENV_HIGH32(ptr);
-  unsigned long oe = (oe_high32 << 32) | oe_low32;
-  return((void *) oe);
-}
 #else
 LP wcl_wb(LPL lhs_address, LP rhs) {
-    return(*lhs_address = rhs);
+  return((LP) (*lhs_address = (LD) rhs));
 }    
 
 LP alloc_words_1(long num_words, long tag, long len_field) {
