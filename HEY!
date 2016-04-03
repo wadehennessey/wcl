@@ -11,45 +11,14 @@ BUT, static allocation doesn't seem to be used any more.
 
 pass in RTscan_memory as arg to root scanner, eliminate extern RTscan_memory
 
-write barrier here:
-
-trampoline writes ptr into OE var - should need wcl_wb call.
-Avoid this by adding OE scan to thread stack scans, treat it like the stack
-
 OE needs to become thread local var if we want to run multiple threads
 would these cause it to be on the stack and thus get copied on stack
 or would we need to add OE value to thread state and copy that too?
 
 
-remaining c-src
-----------------
-memory.c
+Compiling file #P"../cl/decls/cl-macros.lisp"
+6145544 exceeds the maximum object size
 
-array.c
-  no wcl_wb for initialize_array - seems to only init new arrays
-
-lisp.h - partial - see UPDATE_* notes below
-
-Investigate these:
-/* These symbol macros are only used by the linker and do not need
-   to indirect through the symbol link. */
-#define UPDATE_VAR(sym,v,flag_pos) sym.value = (LP) v; \
-                                   SET_SYMBOL_FLAG(sym,flag_pos)
-	
-#define UPDATE_FUNC(sym,value) sym.function = LREF(value)
-
-/* HEY! This is broken, need to put func in hash table */    
-#define UPDATE_MACRO(sym,value,flag_pos) UPDATE_FUNC(sym,value); \
-                                         SET_SYMBOL_FLAG(sym,flag_pos)
-
-change sleep before rtgc loop to volatile flag that wcl init is done
-
-check this:
-
-      // Use this code to enable large object recycle
-      // currently crashes after a bit of run time
-      GCPTR gcptr = (GCPTR) next_object;
-      return(GREENP(gcptr));
-      //return(0);
-
-crashes right now in rtwcl
+in analyze:
+fix local-proc-name to not intern symbols
+Try just making an uninterned symbol?

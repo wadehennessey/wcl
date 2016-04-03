@@ -21,7 +21,7 @@ sighandler_t signal(int signum, sighandler_t handler);
 LP p_lsp_START_2DAPPLICATION(ARGC argc, LP v_MAIN_2DFUNCTION_0);
 void rtgc_loop();
 
-#define DEFAULT_DYNAMIC_MEMORY_SIZE 8192
+#define DEFAULT_DYNAMIC_MEMORY_SIZE (28 * 1024 * 1024)
 #define DEFAULT_STATIC_MEMORY_SIZE 512
 
 int command_line_argc;
@@ -82,7 +82,7 @@ void start_initialization(int argc, char *argv[],
 #if RTGC
   //RTatomic_gc = 1;
   RTatomic_gc = 0;
-  RTinit_heap(28 * 1024 * 1024, 0);
+  RTinit_heap(dynamic_memory_size * 1024, 0);
 #else
   init_memory_allocator(dynamic_memory_size,static_memory_size);
 #endif
@@ -106,11 +106,9 @@ void init_wcl_threads(LP start_func) {
   new_thread(&start_main_thread, (void *) start_func);
   RTregister_root_scanner(scan_wcl_static_symbols);
   RTregister_no_write_barrier_state(&OE, sizeof(OE));
-  // Avoid possible startup write barrier issues
-  // wcl_wb calls aren't in things like UPDATE_VAR and UPDATE_FUNCTION
-  // that are used at startup
-  sleep(1);
-  //printf("Entering rtgc_loop\n");
+  // wcl initialization is done by the time we get here,
+  // wcl_wb calls aren't in things like UPDATE_VAR,
+  // UPDATE_FUNCTION, and UPDATE_MACRO
   rtgc_loop();
 #else
   p_lsp_START_2DAPPLICATION(1,start_func);
