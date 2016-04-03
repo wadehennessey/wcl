@@ -430,16 +430,15 @@
       (lambda-expr (analyze-proc (local-proc-name) function nil))
       (t (compiler-warn "~A is not a legal function" function)))))
 
-;;; HEY! shouldn't really intern stuff here
 (defun local-proc-name (&optional (name (genstring "anon")))
-  (intern (concatenate 'string
-		       (apply #'concatenate
-			      'string
-			      (mapcar #'(lambda (x)
-					  (symbol-name (proc-name x)))
-				      *proc-chain*))
-		       "-"
-		       (genstring name))))
+  (make-symbol (concatenate 'string
+			    (apply #'concatenate
+				   'string
+				   (mapcar #'(lambda (x)
+					       (symbol-name (proc-name x)))
+					   *proc-chain*))
+			    "-"
+			    (genstring name))))
 
 (defun analyze-named-function (form)
   (destructuring-bind (special-form name lambda-expr) form
