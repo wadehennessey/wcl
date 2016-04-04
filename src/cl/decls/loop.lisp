@@ -112,7 +112,7 @@
 (defmacro loop-pop-source () '(pop loop-source-code))
 
 (defmacro loop-gentemp (&optional (pref ''loopvar-))
-  `(gentemp (symbol-name ,pref)))
+  `(gensym (symbol-name ,pref)))
 
 (defvar loop-use-system-destructuring?
     nil)
