@@ -402,7 +402,7 @@
 		 (namestring dest))))
 
 (defun file-init-thunk-name (pathname)
-  (gentemp (format nil "~A_INIT" (string-upcase (pathname-name pathname)))))
+  (gensym (format nil "~A_INIT" (string-upcase (pathname-name pathname)))))
 
 (defun compile-file (&rest args)
   (apply #'comf args))
