@@ -20,10 +20,12 @@
 (defconstant array-dimension-limit 16777215)
 (defconstant array-rank-limit 1048576)
 
+;;; Why do these start at 2?
 (defvar *gensym-counter* 2)
 (defvar *gensym-prefix* "G")
 (defvar *gentemp-counter* 2)
-
+(defvar *symtemp-counter* 2)
+  
 (defvar *character-names* '(("Space" .  #\Space)
 			    ("Newline" . #\Newline)
 			    ("Linefeed" . #\Linefeed)

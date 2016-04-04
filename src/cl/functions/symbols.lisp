@@ -109,8 +109,17 @@
 (defun-inline gentemp (&optional (prefix "T") (package *package*))
   (gentemp/2 prefix package))
 
+(defun-inline symtemp (&optional (prefix "SYMTMP-") 
+				 (package *package*))
+  (symtemp/2 prefix package))
+
+(defun symtemp/2 (prefix package)
+  (incf *symtemp-counter*)
+  (let ((name (string+number->string prefix *symtemp-counter*)))
+    (make-symbol name)))
+
 (defun gentemp/2 (prefix package)
-  (incf  *gentemp-counter*)
+  (incf *gentemp-counter*)
   (let ((name (string+number->string prefix *gentemp-counter*)))
     (intern name package)))		; HEY! Fix to make sure it's unique
 
