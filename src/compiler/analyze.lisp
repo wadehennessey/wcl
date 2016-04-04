@@ -1292,7 +1292,7 @@
   (typep x '(or dynamic-scope-control-point dynamic-tag-control-point)))
 
 (defun unique-control-point-tag (name)
-  (analyze-1 `(quote ,(gentemp (symbol-name name))) nil nil))
+  (analyze-1 `(quote ,(gensym (symbol-name name))) nil nil))
 
 (defun make-progn-if-needed (body)
   (cond ((atom body) body)
