@@ -92,6 +92,9 @@
 (defsetf fdefinition (function-specifier) (new-value)
   `(set-fdefinition ,new-value ,function-specifier))
 
+(defun-inline gensym (&optional x)
+  (gensym/1 x))
+
 (defun gensym/1 (x)
   (incf  *gensym-counter*)
   (let* ((n (if (null x)
@@ -103,20 +106,8 @@
 	 (name (string+number->string *gensym-prefix* n)))
     (make-symbol name)))
 
-(defun-inline gensym (&optional x)
-  (gensym/1 x))
-
 (defun-inline gentemp (&optional (prefix "T") (package *package*))
   (gentemp/2 prefix package))
-
-(defun-inline symtemp (&optional (prefix "SYMTMP-") 
-				 (package *package*))
-  (symtemp/2 prefix package))
-
-(defun symtemp/2 (prefix package)
-  (incf *symtemp-counter*)
-  (let ((name (string+number->string prefix *symtemp-counter*)))
-    (make-symbol name)))
 
 (defun gentemp/2 (prefix package)
   (incf *gentemp-counter*)

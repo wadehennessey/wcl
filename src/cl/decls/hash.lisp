@@ -24,7 +24,6 @@
 (defvar *gensym-counter* 2)
 (defvar *gensym-prefix* "G")
 (defvar *gentemp-counter* 2)
-(defvar *symtemp-counter* 2)
   
 (defvar *character-names* '(("Space" .  #\Space)
 			    ("Newline" . #\Newline)
