@@ -173,7 +173,7 @@
 (defvar *print-level* nil)
 (defvar *print-length* nil)
 (defvar *print-case* nil)
-(defvar *print-gensym* nil)
+(defvar *print-gensym* t)
 (defvar *print-array* nil)
 (defvar *print-readably* nil)
 (defvar *print-right-margin* nil)
