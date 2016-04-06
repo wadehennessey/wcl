@@ -1129,7 +1129,7 @@
 
 (defun unintern (symbol &optional (p *package*))
   (let ((package (coerce-to-package p)))
-    (error "Write unintern!!!")))
+    (remhash symbol (package-symbols package))))
 
 (defun use-package (package-list &optional (using *package*))
   (let ((using-package (coerce-to-package using)))
