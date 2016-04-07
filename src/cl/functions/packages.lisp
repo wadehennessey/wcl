@@ -1128,8 +1128,11 @@
   (import symbols package))
 
 (defun unintern (symbol &optional (p *package*))
-  (let ((package (coerce-to-package p)))
-    (remhash symbol (package-symbols package))))
+  (let* ((package (coerce-to-package p))
+	 (removed? (remhash symbol (package-symbols package))))
+    (when removed?
+      (setf (symbol-package symbol) nil))
+    removed?))
 
 (defun use-package (package-list &optional (using *package*))
   (let ((using-package (coerce-to-package using)))

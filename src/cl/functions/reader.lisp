@@ -472,9 +472,11 @@
 
 (defun sharp-macro-read-uninterned (stream subchar arg)
   (declare (ignore subchar arg))
-  ;; HEY! We really need a read-token here. This is a horrible hack.
-  (let ((interned-symbol (read stream t nil t)))
-    (make-symbol (symbol-name interned-symbol))))
+  ;;; This is still broken, but better than before when the symbol stayed
+  ;;; interned. Still need a way to read without interning at all.
+  (let ((symbol (read stream t nil t)))
+    (unintern symbol)
+    symbol))
 
 (defun sharp-macro-read-vector (stream subchar length)
   (declare (ignore length))
