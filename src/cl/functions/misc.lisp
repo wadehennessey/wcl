@@ -924,5 +924,3 @@
 
 (defun dribble (&rest ignore)
   (error "Sorry, `dribble' is not yet implemented"))
-
-

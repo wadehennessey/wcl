@@ -1,4 +1,5 @@
 #!/bin/tcsh
-ld -dy -G -o /home/wade/wcl/linux/lib/libcom.so  ../compiler/globals.o  ../compiler/macros.o  ../compiler/configurations.o  ../compiler/function-info.o  ../compiler/type-dispatch.o  ../compiler/line-numbers.o  ../compiler/analyze.o  ../compiler/beta.o  ../compiler/tree-nsubst.o  ../compiler/improve.o  ../compiler/name-mangle.o  ../compiler/emit-code.o  ../compiler/emit-data.o  ../compiler/compiler-init.o  ../compiler/compile.o  ../compiler/symbol-table.o  ../compiler/library.o  ../compiler/link.o  /tmp/com-preds.o /tmp/com-data.o /usr/local/lib/libgmp.a -lc -lm -ldl -lnsl
+ld -dy -G -o /home/wade/wcl//lib/libcom.so  ../compiler/globals.o  ../compiler/macros.o  ../compiler/configurations.o  ../compiler/function-info.o  ../compiler/type-dispatch.o  ../compiler/line-numbers.o  ../compiler/analyze.o  ../compiler/beta.o  ../compiler/tree-nsubst.o  ../compiler/improve.o  ../compiler/name-mangle.o  ../compiler/emit-code.o  ../compiler/emit-data.o  ../compiler/compiler-init.o  ../compiler/compile.o  ../compiler/symbol-table.o  ../compiler/library.o  ../compiler/link.o  /tmp/com-preds.o /tmp/com-data.o -lgmp -lc -lm -ldl -lnsl
+
 
 

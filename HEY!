@@ -15,10 +15,32 @@ OE needs to become thread local var if we want to run multiple threads
 would these cause it to be on the stack and thus get copied on stack
 or would we need to add OE value to thread state and copy that too?
 
+fact:
+-----
+gcc -w -xc -pipe  -g  -fPIC  -c -I/home/wade/wcl//include -o ../cl/functions/misc.o ../cl/functions/misc.wcl
 
-Compiling file #P"../cl/decls/cl-macros.lisp"
-6145544 exceeds the maximum object size
+then run ld again
 
-in analyze:
-fix local-proc-name to not intern symbols
-Try just making an uninterned symbol?
+
+LP p_lsp_FACT(ARGC argc, LP v_N_0)
+{
+  LP t0; LP t1; LP t2; LP t3; LP t4; LP t5; 
+  LP t6; LP t7; LP t8; 
+#line 928 "/home/wade/wcl/src/cl/functions/misc.lisp"
+  if (argc != 1) wna(argc,1);
+#line 929 "/home/wade/wcl/src/cl/functions/misc.lisp"  
+  t1 = (num_equal_p(((LP) 0), (v_N_0)));
+#line 932 "/home/wade/wcl/src/cl/functions/misc.lisp"        
+  if (t1 != NIL) {
+#line 930 "/home/wade/wcl/src/cl/functions/misc.lisp"    
+    return((LP) 4);
+  } else {
+#line 932 "/home/wade/wcl/src/cl/functions/misc.lisp"    
+    t3 = (subtract((v_N_0), ((LP) 2)));
+#line 932 "/home/wade/wcl/src/cl/functions/misc.lisp"        
+    t2 = ICALL(s_lsp_FACT) (1, t3);
+#line 931 "/home/wade/wcl/src/cl/functions/misc.lisp"            
+    t0 = (multiply((v_N_0), (t2)));
+    return(t0);
+  }
+}

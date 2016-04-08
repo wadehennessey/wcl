@@ -381,7 +381,7 @@
 
 (defvar *default-libraries* '(:cl))
 
-(defvar *pic?* nil)
+(defvar *pic?* t)
 
 (defvar *emit-symbol-data-function* nil)
 
