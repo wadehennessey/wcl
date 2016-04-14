@@ -340,11 +340,15 @@
 			 (:package (eval rest))
 			 (:sym (incf symcount)
 			       (format symtab-output
-				       "~A = 0x~X;~%"
+				       "~A  = 0x~X - 0x7ffff2bb6000;~%"
 				       (lisp->c-symbol-name rest)
 				       ;;; un-LREF it - what func for this?
 				       ;;; Total HACK!
-				       (- (object->pointer rest) #x0)))
+
+				       (- (object->pointer rest) #x9)
+				       ;;;#x200
+
+				       ))
 			 (t nil)))))
       (with-open-file (default default-script-name)
 	(let ((copy? nil))
@@ -364,7 +368,7 @@
     (let ((status
 	   (shell
 	    (format nil
-		    "gcc -shared ~A -Wl,-soname,~A -o ~A ~A -lc -lm -lnsl"
+		    "gcc -fPIC -shared ~A -Wl,-soname,~A -o ~A ~A -lc -lm -lnsl"
 		    (if (null symtab-name)
 			""
 		        (format nil "-Wl,\"-T,~A\"" symtab-name))
