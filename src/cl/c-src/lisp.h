@@ -499,10 +499,10 @@ extern UW_POINT *uw_top;
     uwp.name = LREF(symbol); \
     uwp.value = symbol.value; \
     PUSH_UW_POINT(uwp); \
-    symbol.value = new_value;
+    wcl_wb(&(symbol.value), (LP) (new_value))
 
 #define END_SPEC_BIND(symbol) \
-    symbol.value = uwp.value; \
+    wcl_wb(&(symbol.value), (LP) (uwp.value));	\
     POP_UW_POINT; \
   }
 
