@@ -39,7 +39,7 @@ int internal_user_run_time() {
   struct rusage stats;
 
   getrusage(RUSAGE_SELF,&stats);
-  return(timeval_to_internal_time(&(stats.ru_stime)));
+  return(timeval_to_internal_time(&(stats.ru_utime)));
 }
 
 int internal_real_time () {
