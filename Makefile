@@ -1,10 +1,7 @@
 
-all:	cl clx pprint logical-pathnames pcl 
-
-dist:	
-	make cl WCL_CONFIGURATION=`pwd`/src/build/DIST_CONFIGURATION
-	rm -rf dist-bin
-	cp ./src/build/USER_CONFIGURATION CONFIGURATION
+all:	cl
+# The following packages are no longer supported
+# clx pprint logical-pathnames pcl
 
 cl:
 	rm -rf dist-bin dist-lib
@@ -46,6 +43,11 @@ install:
 	cp bin/wcl /usr/bin
 	cp lib/* /usr/lib64
 	/sbin/ldconfig
+
+dist:	
+	make cl WCL_CONFIGURATION=`pwd`/src/build/DIST_CONFIGURATION
+	rm -rf dist-bin
+	cp ./src/build/USER_CONFIGURATION CONFIGURATION
 
 distbins:
 	rm -rf dist-lib dist-bin
