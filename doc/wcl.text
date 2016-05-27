@@ -31,21 +31,8 @@ emacs/gdb-init.gdb.
 After wcl has started, it will load an initialization file named
 ~/.wclinit if it exists.
 
-
-LOADABLE SYSTEMS
-----------------
-
-Ports of the following systems are provided:
-
-	- Cltl2 Pretty Printer - loaded by (load-pprint)
- 	- PCL: loaded by (load-clos)
-	- Logical Pathnames: loaded by (load-logical-pathnames)
-
-Refer to the README file or sources for each system for more details.
-
-CLX
+CLX - *****currently has a bug that prevents it from working*****
 ---
-NOTE: CLX currently has a bug that prevents it from working
 
 CLX R5 is provided as an optional library. 
 
@@ -64,15 +51,10 @@ cd to src/clx/test directory
 
 EXTENSIONS TO CL
 ----------------
-
 WCL contains some popular extensions to pure CLtl1. 
-Refer to the sources and the file lib/rtl/packages/package-setup-info.lisp
-for more information.
-
 
 FOREIGN FUNCTION CALLS
 ----------------------
-
 The macro DEFFOREIGN is used to tell Lisp how to call foreign
 functions:
 
@@ -410,7 +392,6 @@ Point: #<POINT 64ADD>
 
 CREATING SHARED LIBRARIES OF LISP CODE
 --------------------------------------
-
 Here is an example of how to create a shared library from two
 files name foo.lisp and bar.lisp:
 
@@ -483,7 +464,6 @@ text	data	bss	dec	hex
 
 CALLING SHARED LIBRARIES FROM C
 -------------------------------
-
 Although there is a nice foreign interface from Lisp to C, there
 is no corresponding inteface from C to Lisp. For example, I can
 tell Lisp how to call a C function as follows:
@@ -579,7 +559,6 @@ is currently no provision for doing so.
 
 THE COMPILER
 ------------
-
 The compiler is controlled by setting up different configurations.
 refer to com/common/configurations.lisp for more information.
 PROCLAIM is the CL approved way to change configurations.
@@ -592,7 +571,6 @@ are &RESTV lists.
 
 GARBAGE COLLECTION
 ------------------
-
 The currently collector is based upon the ideas described in Joel
 Bartlett's mostly-copying conservative gc. A single heap area and a
 single static area are used for allocating memory at runtime.
@@ -606,7 +584,6 @@ have this problem (i.e - they're not that tricky).
 
 PORTING WCL
 -----------
-
 The dynamic file loader is the most operating system and machine
 dependent part of the system. Currently the dynamic file loader does not work.
 
@@ -627,13 +604,8 @@ thus are processor specific:
           stack allocated vector.
 
 The actual amount of assembly code is small (perhaps a few dozen lines).
- 
-Generic bignum code is available, but machine specific bignum routines
-are also available for a variety of machines.  All the sources are in
-the bignum directory.
 
 BUG REPORTS
 -----------
-
 Please report any bug reports or questions to wcl@xkey.com
 
