@@ -3,7 +3,7 @@ OPERATING_SYSTEM = "Linux"
 CC = "gcc"
 LIBRARY_CONFIG = *debug-library-config*
 BIN_CONFIG = *default-config*
-SHORT_SITE_NAME = "Palau"
-LONG_SITE_NAME =  "Palau"
+SHORT_SITE_NAME = "Short-Site-Name"
+LONG_SITE_NAME =  "Long-Site-Name"
 WCL_VERSION = "3.0"
 

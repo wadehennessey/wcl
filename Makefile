@@ -1,7 +1,5 @@
 
 all:	cl
-# The following packages are no longer supported
-# clx pprint logical-pathnames pcl
 
 cl:
 	rm -rf dist-bin dist-lib
@@ -9,18 +7,12 @@ cl:
 	cp -r lib dist-lib
 	(cd src/build; ./compile-all)
 
+# clx currently has a bug preventing it from working
 clx:
 	(cd src/build; ../../bin/wcl -m 24000 < compile-clx-script.lisp)
 
-pprint:
-	(cd src/cl/pprint; make install)
-
-pcl:
-	(cd src/pcl; make install)
-
-logical-pathnames:
-	(cd src/misc; make install)
-
+# this currently doesn't work properly when done repeatedly. Use "cl" target
+# instead.
 rebuild:
 	rm -rf dist-bin dist-lib
 	mv bin dist-bin
@@ -40,8 +32,9 @@ clean:
 	find src/misc -name "*.wcl" -exec rm -f {} \;
 
 install:
-	cp bin/wcl /usr/bin
-	cp lib/* /usr/lib64
+	cp bin/wcl /usr/local/bin
+	cp lib/* /usr/local/lib64
+	cp include/lisp.h /usr/local/include
 	/sbin/ldconfig
 
 dist:	
