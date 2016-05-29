@@ -324,10 +324,17 @@ LP c_cons(LP x, LP y) {
   return(ptr);
 }
 
-// Put these in rtgc/allocate.h? Call file RTallocate.h?
+// Put these in rtgc/allocate.h? Call file rtgc.h?
 //typedef unsigned long * LPTR;
 typedef unsigned char * BPTR;
 void RTscan_memory_segment(BPTR *low, BPTR *high);
+
+void scan_wcl_object(void *low, void *high) {
+  // Generalize this for more than just closure objects
+  BPTR env = wcl_get_closure_env((BPTR) low + sizeof(long));
+  //printf("closure env is %p\n", env);
+  RTtrace_pointer(env);
+}
 
 void scan_wcl_static_symbols() {
   SYMBOL_RECORD *ptr;
