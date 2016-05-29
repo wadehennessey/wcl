@@ -270,21 +270,12 @@ LP wcl_wb(LPL lhs_address, LP rhs) {
   return(RTwrite_barrier(lhs_address, rhs));
 }    
 
-#define MALLOC_SAFETY_BYTES 0
-
-int safe_malloc_count = 8;
-
 void *safe_malloc(size_t size, long tag) {
-  if (0 == safe_malloc_count) {
-    printf("MALLOC_SAFETY_BYTES is %d\n", MALLOC_SAFETY_BYTES);
-  }
-  safe_malloc_count = safe_malloc_count + 1;
   void *ptr;
-  if (tag != TYPE_CLOSURE) {    
-    ptr = RTallocate(RTpointers, size);
-  } else {
-    // cause storage class to be SC_METADATA
-    ptr = RTallocate((void *) tag, size);
+
+  switch (tag) {
+  case TYPE_CLOSURE: ptr = RTallocate(RTcustom1, size); break;
+  default: ptr = RTallocate(RTpointers, size);
   }
   
   if (0 == ptr) {
