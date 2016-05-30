@@ -271,12 +271,18 @@ LP wcl_wb(LPL lhs_address, LP rhs) {
 }    
 
 void *safe_malloc(size_t size, long tag) {
-  void *ptr;
+  void *ptr; 
+  void *metadata;
 
   switch (tag) {
-  case TYPE_CLOSURE: ptr = RTallocate(RTcustom1, size); break;
-  default: ptr = RTallocate(RTpointers, size);
+  case TYPE_CONS:
+  case TYPE_CLOSURE: //ptr = RTallocate(RTcustom1, size); break;
+    metadata = RTcustom1;
+    break;
+  default: //ptr = RTallocate(RTpointers, size);
+    metadata = RTpointers;
   }
+  ptr = RTallocate(metadata, size);
   
   if (0 == ptr) {
     printf("safe malloc failed!\n");
@@ -320,11 +326,34 @@ LP c_cons(LP x, LP y) {
 typedef unsigned char * BPTR;
 void RTscan_memory_segment(BPTR *low, BPTR *high);
 
+static void trace_pointer(LP ptr) {
+  // Only trace tagged pointers, not fixnums
+  if (OTHER_PTRP(ptr)) {
+    RTtrace_pointer(ptr);
+  }
+}
+
 void scan_wcl_object(void *low, void *high) {
-  // Generalize this for more than just closure objects
-  BPTR env = wcl_get_closure_env((BPTR) low + sizeof(long));
-  //printf("closure env is %p\n", env);
-  RTtrace_pointer(env);
+  // Hey! add check to be sure we dont trace fixnums
+  LP ptr = (BPTR) low + sizeof(long) + 1;
+  switch (TAG(ptr) & TAG_MASK) {
+  case TYPE_CONS:
+    trace_pointer(LDREF(ptr,CONS,car));
+    trace_pointer(LDREF(ptr,CONS,cdr));
+    break;
+
+  case TYPE_CLOSURE: {
+    BPTR env = wcl_get_closure_env((BPTR) low + sizeof(long));
+    // We can always be certain that env isn't a fixnum and points into the heap
+    RTtrace_heap_pointer(env);
+  }
+    break;
+
+  case TYPE_VOID:
+  default:
+    printf("scan_wcl_object error: unknown tag: %x\n",TAG(ptr));
+    lisp_debug();
+  }
 }
 
 void scan_wcl_static_symbols() {
