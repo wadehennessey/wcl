@@ -306,7 +306,6 @@ typedef struct bignum {
   long bits[1];			/* bits len is variable in reality */
 } BIGNUM;
 
-/* Some losing C preprocessors will only pass 80 chars in a string! */
 #define MAKE_SIMPLE_STRING(label,len,str) \
   static struct {unsigned long header; char string[len+1];} \
   label  = {((len << 8) + TYPE_SIMPLE_STRING), str}

@@ -282,6 +282,7 @@ LP initialize_array(LP array,
 
 LP c_to_lisp_vector(char *vector,long element_type_tag,long len) {
   LP v;
+
   v = alloc_bytes(sizeof(COMPLEX_VECTOR) - sizeof(long),TYPE_SIMPLE_VECTOR);
   LHEADER(v) = (len << 8) + (element_type_tag + COMPLEX_VECTOR_TAG);
   /* It's ok to put a pointer outside the heap here because the GC

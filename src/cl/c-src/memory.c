@@ -272,17 +272,10 @@ LP wcl_wb(LPL lhs_address, LP rhs) {
 
 void *safe_malloc(size_t size, long tag) {
   void *ptr; 
-  void *metadata;
 
-  switch (tag) {
-  case TYPE_CONS:
-  case TYPE_CLOSURE: //ptr = RTallocate(RTcustom1, size); break;
-    metadata = RTcustom1;
-    break;
-  default: //ptr = RTallocate(RTpointers, size);
-    metadata = RTpointers;
-  }
-  ptr = RTallocate(metadata, size);
+  // Revert back to plain old RTpointers to avoid possible bugs in RTcustom1 
+  //ptr = RTallocate(RTpointers, size);
+  ptr = RTallocate(RTcustom1, size);
   
   if (0 == ptr) {
     printf("safe malloc failed!\n");
@@ -342,11 +335,129 @@ void scan_wcl_object(void *low, void *high) {
     trace_pointer(LDREF(ptr,CONS,cdr));
     break;
 
-  case TYPE_CLOSURE: {
-    BPTR env = wcl_get_closure_env((BPTR) low + sizeof(long));
-    // We can always be certain that env isn't a fixnum and points into the heap
-    RTtrace_heap_pointer(env);
-  }
+  case TYPE_PROCEDURE:
+    switch (HEADER(ptr)) {
+    case FUNCALLABLE_INSTANCE_HEADER:
+      printf("funcallable_instace support is untested\n");
+      lisp_debug();
+      trace_pointer(ADD_TAG(LDREF(ptr,FUNCALLABLE_INSTANCE, code_pointer)));
+      trace_pointer(LDREF(ptr,FUNCALLABLE_INSTANCE,wrapper));
+      trace_pointer(LDREF(ptr,FUNCALLABLE_INSTANCE,slots));
+      break;
+    case CLOSED_PROCEDURE_HEADER:
+      trace_pointer(ADD_TAG(LDREF(ptr,PROCEDURE,code_pointer)));
+      break;
+    }
+    break;  
+
+  case TYPE_CLOSURE:
+    {
+      BPTR env = wcl_get_closure_env((BPTR) low + sizeof(long));
+      // We know that env isn't a fixnum and always points into the heap
+      RTtrace_heap_pointer(env);
+    }
+    break;
+
+  case TYPE_COMPLEX:
+    trace_pointer(LDREF(ptr,COMPLEX,real));
+    trace_pointer(LDREF(ptr,COMPLEX,imaginary));
+    break;
+
+  case TYPE_RATIO:
+    trace_pointer(LDREF(ptr,RATIO,numerator));
+    trace_pointer(LDREF(ptr,RATIO,denominator));
+    break;
+    
+  case TYPE_SYMBOL:
+    trace_pointer(LDREF(ptr,SYMBOL,value));
+    trace_pointer(LDREF(ptr,SYMBOL,package));
+    trace_pointer(LDREF(ptr,SYMBOL,name));
+    trace_pointer(LDREF(ptr,SYMBOL,plist));
+    trace_pointer(LDREF(ptr,SYMBOL,function));
+    break;
+
+  case TYPE_LINE_SYMBOL:
+    printf("line_symbol support is untested!\n");
+    lisp_debug();
+    trace_pointer(LDREF(ptr,LINE_SYMBOL,self_link));
+    break;
+
+  case TYPE_OE:
+  case TYPE_STRUCTURE:
+  case TYPE_SIMPLE_VECTOR:
+    {
+      long i;
+      long len = LEN_FIELD(ptr) * sizeof(long);
+      for (i = 0; i < len; i = i + sizeof(long)) {
+	trace_pointer((LP) DEREF(ptr + i));
+      }
+    }
+    break;
+
+  case TYPE_BIGNUM:
+    break;
+
+  case TYPE_CHARACTER:
+  case TYPE_FLOAT:
+  case TYPE_SIMPLE_BIT_VECTOR:
+  case TYPE_SIMPLE_SIGNED_8BIT_VECTOR:
+  case TYPE_SIMPLE_UNSIGNED_8BIT_VECTOR:
+  case TYPE_SIMPLE_STRING:
+  case TYPE_SIMPLE_SIGNED_16BIT_VECTOR:
+  case TYPE_SIMPLE_UNSIGNED_16BIT_VECTOR:
+  case TYPE_SIMPLE_SIGNED_32BIT_VECTOR:
+  case TYPE_SIMPLE_UNSIGNED_32BIT_VECTOR:
+  case TYPE_SIMPLE_FLOAT_VECTOR:
+  case TYPE_PADDING:
+    break;
+
+  case TYPE_SIMPLE_BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_SIGNED_8BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_UNSIGNED_8BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_CHAR_MULTI_ARRAY:
+  case TYPE_SIMPLE_SIGNED_16BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_UNSIGNED_16BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_SIGNED_32BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_UNSIGNED_32BIT_MULTI_ARRAY:
+  case TYPE_SIMPLE_PTR_MULTI_ARRAY:
+  case TYPE_SIMPLE_FLOAT_MULTI_ARRAY:
+      trace_pointer(LDREF(ptr,SIMPLE_MULTI_ARRAY,underlying_vector));
+      trace_pointer(LDREF(ptr,SIMPLE_MULTI_ARRAY,dims_vector));
+      trace_pointer(LDREF(ptr,SIMPLE_MULTI_ARRAY,multiplier_vector));
+      break;
+
+    
+  case TYPE_COMPLEX_BIT_VECTOR:
+  case TYPE_COMPLEX_SIGNED_8BIT_VECTOR:
+  case TYPE_COMPLEX_UNSIGNED_8BIT_VECTOR:
+  case TYPE_COMPLEX_CHAR_VECTOR:
+  case TYPE_COMPLEX_SIGNED_16BIT_VECTOR:
+  case TYPE_COMPLEX_UNSIGNED_16BIT_VECTOR:
+  case TYPE_COMPLEX_SIGNED_32BIT_VECTOR:
+  case TYPE_COMPLEX_UNSIGNED_32BIT_VECTOR:
+  case TYPE_COMPLEX_PTR_VECTOR:
+  case TYPE_COMPLEX_FLOAT_VECTOR:
+    trace_pointer(LDREF(ptr,COMPLEX_VECTOR,underlying_vector));
+    /* Ignore fill pointer and displaced-index offset */
+    break;
+
+  case TYPE_COMPLEX_BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_SIGNED_8BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_UNSIGNED_8BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_CHAR_MULTI_ARRAY:
+  case TYPE_COMPLEX_SIGNED_16BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_UNSIGNED_16BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_SIGNED_32BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_UNSIGNED_32BIT_MULTI_ARRAY:
+  case TYPE_COMPLEX_PTR_MULTI_ARRAY:
+  case TYPE_COMPLEX_FLOAT_MULTI_ARRAY:
+    trace_pointer(LDREF(ptr,COMPLEX_MULTI_ARRAY,underlying_vector));
+    trace_pointer(LDREF(ptr,COMPLEX_MULTI_ARRAY,dims_vector));
+    trace_pointer(LDREF(ptr,COMPLEX_MULTI_ARRAY,multiplier_vector));
+    /* Ignore displaced-index offset */
+    break;
+
+  case TYPE_FOREIGN_PTR:
     break;
 
   case TYPE_VOID:
