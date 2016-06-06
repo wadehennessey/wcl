@@ -13,7 +13,6 @@ WCL, but only under the conditions described in doc/LICENSE file.
 
 WCL OVERVIEW
 ------------
-
 Common Lisp implementations for Unix have traditionally provided a
 rich development environment at the expense of an inefficient delivery
 environment.  The goal of WCL is to allow hundreds of Lisp
@@ -32,9 +31,8 @@ languages that allow runtime mappings from names to objects.
 
 WCL DOCUMENTATION
 -----------------
-
 doc/COPYING -   WCL copying terms
 doc/LICENSE -   WCL license terms
-doc/INSTALL -   information about installing WCL
+doc/INSTALL -   Information about installing WCL
 doc/lfp-paper.* - 1992 Lisp and Functional Programming Conference paper on WCL
-doc/wcl.text -   Scant information about WCL usage and porting.
+doc/wcl.text - Information about WCL usage and porting.
