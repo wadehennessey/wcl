@@ -175,7 +175,7 @@
 (defun ld-executable (output-file files preds-file data-file unix-libs)
   (invoke-linker
        (format nil
-	       "~A -o ~A ~A ~A ~{~A ~} -L~A/lib ~{-l~A ~} -L/home/wade/rtgc -lrtgc"
+	       "~A -o ~A ~A ~A ~{~A ~} -L~A/lib ~{-l~A ~} -lrtgc"
 	       (if *profile?* "-p " "")
 	       (namestring output-file)
 	       (namestring (merge-pathnames ".o" preds-file))

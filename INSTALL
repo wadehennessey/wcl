@@ -19,7 +19,7 @@ TO COMPILE FROM SOURCE
 ----------------------
 In the same directory as this file do the following:
 
-make rebuild
+make
 
 This runs the current binaries from directories called called dist-bin and
 dist-lib and places the newly compiled binaries in bin and lib.
