@@ -506,6 +506,13 @@ LP alloc_words_1(long num_words, long tag, long len_field) {
   return(ptr);
 }
 
+LP static_alloc_words_1(long num_words, long tag, long len_field) {
+  switch_to_static_space();
+  LP ptr = alloc_words_1(num_words, tag, len_field); 
+  switch_to_dynamic_space();
+  return(ptr);
+}
+  
 /* Save a few instructions consing. Not sure if this is worth
    duplicating the allocation code.  */
 LP c_cons(LP x, LP y) {
@@ -525,7 +532,7 @@ LP c_cons(LP x, LP y) {
   return(ptr);
 }
 #endif
-     
+
 LP alloc_words(long num_words, long tag) {
   return(alloc_words_1(num_words,tag,num_words));
 }

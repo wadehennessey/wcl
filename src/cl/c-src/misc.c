@@ -74,7 +74,9 @@ LP make_symbol(LP name, LP hashcode) {
 }
 
 LP make_static_symbol(LP name, LP hashcode) {
-  printf("use static_alloc_words!\n");
+  // HEY! use static_alloc_words
+  LP symbol = alloc_words((sizeof(SYMBOL)/sizeof(long) - 1),TYPE_SYMBOL);
+  return(initialize_symbol(symbol, name, hashcode));
 }
 
 LP new_foreign_ptr(LP type, LP ptr) {
