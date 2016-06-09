@@ -558,7 +558,8 @@ LP alloc_words(long len, long tag);
 LP alloc_shorts(long size, long tag);
 LP alloc_bytes(long len, long tag);
 LP alloc_bits(long len, long tag);
-
+LP static_alloc_words(long len, long tag);
+ 
 LP new_closure(LP code, LP env);
 LP new_oe(long len);
 LP new_float(double n);

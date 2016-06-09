@@ -506,9 +506,9 @@ LP alloc_words_1(long num_words, long tag, long len_field) {
   return(ptr);
 }
 
-LP static_alloc_words_1(long num_words, long tag, long len_field) {
+LP static_alloc_words(long num_words, long tag) {
   switch_to_static_space();
-  LP ptr = alloc_words_1(num_words, tag, len_field); 
+  LP ptr = alloc_words_1(num_words, tag, num_words); 
   switch_to_dynamic_space();
   return(ptr);
 }
@@ -534,7 +534,7 @@ LP c_cons(LP x, LP y) {
 #endif
 
 LP alloc_words(long num_words, long tag) {
-  return(alloc_words_1(num_words,tag,num_words));
+  return(alloc_words_1(num_words, tag, num_words));
 }
 
 LP alloc_memory(long num_units, long unit_size, long tag) {

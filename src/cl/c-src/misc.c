@@ -74,8 +74,7 @@ LP make_symbol(LP name, LP hashcode) {
 }
 
 LP make_static_symbol(LP name, LP hashcode) {
-  // HEY! use static_alloc_words
-  LP symbol = alloc_words((sizeof(SYMBOL)/sizeof(long) - 1),TYPE_SYMBOL);
+  LP symbol = static_alloc_words((sizeof(SYMBOL)/sizeof(long) - 1),TYPE_SYMBOL);
   return(initialize_symbol(symbol, name, hashcode));
 }
 
