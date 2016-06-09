@@ -298,6 +298,12 @@ LP alloc_words_1(long num_words, long tag, long len_field) {
   return(ptr);
 }
 
+LP static_alloc_words(long num_words, long tag) {
+  // HEY! need to write static_alloc_words_1 and call it
+  LP ptr = alloc_words_1(num_words, tag, num_words); 
+  return(ptr);
+}
+
 /* Save a few instructions consing. Not sure if this is worth
    duplicating the allocation code.  */
 LP c_cons(LP x, LP y) {
