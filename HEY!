@@ -7,13 +7,13 @@ p mcheck_check_all()
 cache info: /sys/devices/system/cpu/cpu0/cache/
 -----------------------
 start with static_allocate just does regular alloc
-BUT, static allocation doesn't seem to be used any more.
 
 pass in RTscan_memory as arg to root scanner, eliminate extern RTscan_memory
 
-OE needs to become thread local var if we want to run multiple threads
-would these cause it to be on the stack and thus get copied on stack
-or would we need to add OE value to thread state and copy that too?
+Make OE per thread global
+or a vector indexed by thread number
+&OE then needs to be computed the trampoline, can't be hard wired
+make it be base of thread stack? Just mask SP by fixed stack size mask?
 
 ---------------------------------
 /usr/src/debug/glibc-2.22/elf/dl-open.c

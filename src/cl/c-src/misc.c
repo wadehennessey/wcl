@@ -54,13 +54,10 @@ LP lookup_keyword(LP kwd, LP l) {
   return((LP) UBK_MARKER);
 }
 
-LP make_symbol(LP name, LP hashcode) {
-  LP result;
+LP initialize_symbol(LP symbol, LP name, LP hashcode) {
   SYMBOL *sym;
-
-  result = alloc_words((sizeof(SYMBOL)/sizeof(long) - 1),TYPE_SYMBOL);
-  sym = (SYMBOL *) (result - (sizeof(long) + 1));
-  sym->self_link = result;
+  sym = (SYMBOL *) (symbol - (sizeof(long) + 1));
+  sym->self_link = symbol;
   sym->name = name;
   sym->value = UBV_MARKER;
   sym->package = NIL;
@@ -68,7 +65,16 @@ LP make_symbol(LP name, LP hashcode) {
   sym->function = LREF(ubf_procedure);
   sym->hashcode = hashcode;
   sym->flags = 0;
-  return(result);
+  return(symbol);
+}
+  
+LP make_symbol(LP name, LP hashcode) {
+  LP symbol = alloc_words((sizeof(SYMBOL)/sizeof(long) - 1),TYPE_SYMBOL);
+  return(initialize_symbol(symbol, name, hashcode));
+}
+
+LP make_static_symbol(LP name, LP hashcode) {
+  printf("use static_alloc_words!\n");
 }
 
 LP new_foreign_ptr(LP type, LP ptr) {

@@ -344,12 +344,12 @@ extern CHARACTER char_tab[];
 /* Arg related stuff */
 #define ARGC unsigned long
 #define CALL_ARG_LIMIT 512
-#define MULTIPLE_VALUE_LIMIT 512
+#define MULTIPLE_VALUE_LIMIT 64
 #define APPLY_ARGS_LIMIT CALL_ARG_LIMIT	/* but Generic apply only handles 32 */
 
 typedef struct mv {
   ARGC argc;
-  long  return_flag;
+  long return_flag;
   LP values[MULTIPLE_VALUE_LIMIT];
 } MV;
 

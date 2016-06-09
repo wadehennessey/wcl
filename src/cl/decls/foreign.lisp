@@ -72,6 +72,7 @@
 (defforeign leq_p ((x t) (y t) => (flag t)))
 
 (defforeign make_symbol ((name t) (hash-code t) => (sym t)))
+(defforeign make_static_symbol ((name t) (hash-code t) => (sym t)))
 
 (defforeign dlopen ((file-name char*) (flags int) => (handle t)))
 ;;; HEY! dlsym really returns a uint32. Raw  ptr is returned here.

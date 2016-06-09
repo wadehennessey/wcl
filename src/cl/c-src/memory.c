@@ -1408,8 +1408,8 @@ void full_gc() {
   gettimeofday(&end_tv, 0);
   timersub(&end_tv, &start_tv, &elapsed_tv);
   printf("GC elapsed_tv is %d.%06d\n", elapsed_tv.tv_sec, elapsed_tv.tv_usec);
-  check_memory(0,frontier_page,0);
   printf("GC done, checking memory...");
+  check_memory(0,frontier_page,0);
   printf("done\n\n");
 }
 #endif
