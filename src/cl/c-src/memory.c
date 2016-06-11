@@ -270,20 +270,6 @@ LP wcl_wb(LPL lhs_address, LP rhs) {
   return(RTwrite_barrier(lhs_address, rhs));
 }    
 
-void *safe_malloc(size_t size, long tag) {
-  void *ptr; 
-
-  // Revert back to plain old RTpointers to avoid possible bugs in RTcustom1 
-  //ptr = RTallocate(RTpointers, size);
-  ptr = RTallocate(RTcustom1, size);
-  
-  if (0 == ptr) {
-    printf("safe malloc failed!\n");
-    lisp_debug();
-  }
-  return(ptr);
-}
-
 // All memory allocation goes through this function and c_cons.
 //   However, these are not safe wrt to interrupts.
 LP alloc_words_1(long num_words, long tag, long len_field) {
@@ -292,15 +278,10 @@ LP alloc_words_1(long num_words, long tag, long len_field) {
   LP ptr;
 
   total_num_bytes = (num_words * sizeof(long)) + sizeof(long);
-  base_ptr = safe_malloc(total_num_bytes, tag);
+  // Revert back to plain old RTpointers to avoid possible bugs in RTcustom1 
+  base_ptr = RTallocate(RTcustom1, total_num_bytes);
   ptr = base_ptr + sizeof(long) + 1;
   LHEADER(ptr) = (len_field << 8) + tag;
-  return(ptr);
-}
-
-LP static_alloc_words(long num_words, long tag) {
-  // HEY! need to write static_alloc_words_1 and call it
-  LP ptr = alloc_words_1(num_words, tag, num_words); 
   return(ptr);
 }
 
@@ -312,13 +293,33 @@ LP c_cons(LP x, LP y) {
 
   /* Install header BEFORE incrementing frontier so we don't have
      a pointer to bogus memory  */
-  base_ptr = safe_malloc(sizeof(struct cons), TYPE_CONS);
+  base_ptr = RTallocate(RTcustom1, sizeof(struct cons));
   ptr = base_ptr + sizeof(long) + 1;
   LHEADER(ptr) = (2 << 8) + TYPE_CONS;
   LDREF(ptr,CONS,car) = x;
   LDREF(ptr,CONS,cdr) = y;
   return(ptr);
 }
+
+LP static_alloc_words_1(long num_words, long tag, long len_field) {
+  long total_num_bytes;
+  LP base_ptr;
+  LP ptr;
+
+  total_num_bytes = (num_words * sizeof(long)) + sizeof(long);
+  // Revert back to plain old RTpointers to avoid possible bugs in RTcustom1 
+  base_ptr = RTstatic_allocate(RTcustom1, total_num_bytes);
+  ptr = base_ptr + sizeof(long) + 1;
+  LHEADER(ptr) = (len_field << 8) + tag;
+  return(ptr);
+}
+
+LP static_alloc_words(long num_words, long tag) {
+  //LP ptr = alloc_words_1(num_words, tag, num_words);
+  LP ptr = static_alloc_words_1(num_words, tag, num_words); 
+  return(ptr);
+}
+
 
 // Put these in rtgc/allocate.h? Call file rtgc.h?
 //typedef unsigned long * LPTR;
