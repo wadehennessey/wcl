@@ -472,11 +472,8 @@
 
 (defun sharp-macro-read-uninterned (stream subchar arg)
   (declare (ignore subchar arg))
-  ;;; This is still broken, but better than before when the symbol stayed
-  ;;; interned. Still need a way to read without interning at all.
-  (let ((symbol (read stream t nil t)))
-    (unintern symbol)
-    symbol))
+  (let ((*read-uninterned* t))
+    (read stream t nil t)))
 
 (defun sharp-macro-read-vector (stream subchar length)
   (declare (ignore length))
@@ -632,7 +629,9 @@
 			  (return i)))))
       (declare (fixnum len colon-pos))
       (if (null colon-pos)
-	  (values (intern/2 buffer *package*))
+	  (values (if *read-uninterned* 
+		      (make-symbol buffer)
+		      (intern/2 buffer *package*)))
 	  (let* ((package
 		  (if (= colon-pos 0)
 		      *keyword-package*

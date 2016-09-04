@@ -186,6 +186,7 @@
 (defvar *readtable*)
 (defvar *read-base* 10)
 (defvar *read-suppress* nil)
+(defvar *read-uninterned* nil)
 (defvar *open-paren-count* 0)
 (defvar *close-paren-marker* "CLOSE-PAREN")
 (defvar *dot-marker* "DOT")

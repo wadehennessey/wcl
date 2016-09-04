@@ -22,7 +22,7 @@ LP p_lsp_START_2DAPPLICATION(ARGC argc, LP v_MAIN_2DFUNCTION_0);
 void rtgc_loop();
 
 #define DEFAULT_DYNAMIC_MEMORY_SIZE (128 * 1024)
-#define DEFAULT_STATIC_MEMORY_SIZE (64 * 1024)
+#define DEFAULT_STATIC_MEMORY_SIZE (8 * 1024)
 
 int command_line_argc;
 char **command_line_argv;
