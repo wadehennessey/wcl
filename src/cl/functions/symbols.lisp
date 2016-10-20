@@ -164,7 +164,7 @@
 ;;;  (with-static-space (make_symbol name hash-code)))
 
 (defun make-static-symbol (name hash-code)
-  (make_static_symbol name hash-code)))
+  (make_static_symbol name hash-code))
 
 (defmethod-inline makunbound ((s symbol))
   (%makunbound s)

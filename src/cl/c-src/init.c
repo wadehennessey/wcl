@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #if RTGC
+#include "pthread.h"
 #include "/home/wade/rtgc/allocate.h"
 #endif
 
@@ -104,6 +105,8 @@ extern int run_gc;
 
 void init_wcl_threads(LP start_func) {
 #if RTGC
+  //pthread_t thread;
+  //RTpthread_create(&thread, NULL, &start_main_thread, (void *) start_func);
   new_thread(&start_main_thread, (void *) start_func);
   RTregister_root_scanner(scan_wcl_static_symbols);
   RTregister_no_write_barrier_state(&OE, sizeof(OE));
