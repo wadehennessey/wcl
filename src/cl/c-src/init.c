@@ -22,7 +22,7 @@ sighandler_t signal(int signum, sighandler_t handler);
 LP p_lsp_START_2DAPPLICATION(ARGC argc, LP v_MAIN_2DFUNCTION_0);
 void rtgc_loop();
 
-#define DEFAULT_DYNAMIC_MEMORY_SIZE (28 * 1024)
+#define DEFAULT_DYNAMIC_MEMORY_SIZE (32 * 1024)
 #define DEFAULT_STATIC_MEMORY_SIZE (1 * 1024)
 
 int command_line_argc;
