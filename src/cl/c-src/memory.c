@@ -10,8 +10,6 @@
 #include "limits.h"
 #include "mcheck.h"
 
-#include "/home/wade/rtgc/allocate.h"
-
 #ifdef x86
 #define NUMBER_OF_REGS_TO_SCAN  8
 #endif
@@ -266,6 +264,8 @@ void *wcl_get_closure_env(LP ptr) {
 }
 
 #if RTGC
+#include "/home/wade/rtgc/allocate.h"
+
 LP wcl_wb(LPL lhs_address, LP rhs) {
   return(RTwrite_barrier(lhs_address, rhs));
 }    
