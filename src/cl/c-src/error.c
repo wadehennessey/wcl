@@ -37,21 +37,21 @@ void wna(ARGC actual, ARGC desired) {
   if (MV_HOLDER_P(actual) && (((MV *) actual)->argc == desired)) {
     return;
   } else {
-    printf("Wrong number of arguments: %d args were received, but %d were expected\n",
+    printf("Wrong number of arguments: %ld args were received, but %ld were expected\n",
 	   REAL_ARGC(actual),desired);
     lisp_debug();
   }
 }
 
 void wna_low(ARGC actual, ARGC min) {
-    printf("Wrong number of arguments: only %d args were received, but at least %d were expected\n",
+    printf("Wrong number of arguments: only %ld args were received, but at least %ld were expected\n",
 	   REAL_ARGC(actual),min);
     lisp_debug();
 }
 
 
 void wna_high(ARGC actual, ARGC max) {
-    printf("Wrong number of arguments: %d args were received, but at most %d were expected\n",
+    printf("Wrong number of arguments: %ld args were received, but at most %ld were expected\n",
 	   REAL_ARGC(actual),max);
     lisp_debug();
 }

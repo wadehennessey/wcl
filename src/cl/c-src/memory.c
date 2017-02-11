@@ -189,7 +189,7 @@ long free_static_bytes() {
 
 void terminate_page() {
   if (DEBUG_GC) {
-    printf("terminate_page, frontier: %p, remaining: %d\n",
+    printf("terminate_page, frontier: %p, remaining: %ld\n",
 	   frontier_ptr,remaining_page_bytes);
   }
   if (remaining_page_bytes != 0) {
@@ -231,12 +231,12 @@ void allocate_pages(long n) {
       frontier_page = frontier_page + 1;
     }
     if (frontier_page == limit_page) {
-      printf("Error: cannot find %d contiguous free pages. Must be out of memory\n",n);
+      printf("Error: cannot find %ld contiguous free pages. Must be out of memory\n", n);
       lisp_debug();
     }
   }
   if (DEBUG_GC) {
-    printf("Alloc page, start: %d, len: %d, gen: %d\n",
+    printf("Alloc page, start: %ld, len: %ld, gen: %ld\n",
 	   start_page,n,next_generation);
   }
   allocated_pages = allocated_pages + n;
@@ -915,7 +915,7 @@ void check_memory(long start_page, long end_page, long verbose) {
   while ((page <= end_page) &&
 	 (verbose || (page != ADDRESS_TO_PAGE(frontier_ptr)))) {
     if (verbose) {
-      printf("***** page: %d, gen: %d, contig: %d, next: %d *****\n",
+      printf("***** page: %ld, gen: %d, contig: %d, next: %ld *****\n",
 	     page,
 	     pageinfo[page].generation,
 	     pageinfo[page].contig_flag,
@@ -946,7 +946,7 @@ void check_memory(long start_page, long end_page, long verbose) {
 	    printf("unknown tag in heap\n");
 	  }
 	  if (verbose) {
-	    printf("ptr %p, tag: %s (%x) rest: (%d), len: %d\n",
+	    printf("ptr %p, tag: %s (%lx) rest: (%ld), len: %ld\n",
 		   ptr,name,tag,LEN_FIELD(ptr),len);
 	  }
 	  ptr = ptr + len + sizeof(long);
@@ -1028,7 +1028,7 @@ long scan_memory_segment(unsigned long *low,
 	  }
 	}
 	if (DEBUG_GC) {
-	  printf("%d ",page);
+	  printf("%ld ",page);
 	}
 	pageinfo[page].generation = next_generation;
 	page_lock_count = page_lock_count + 1;
@@ -1048,7 +1048,7 @@ long scan_memory_segment(unsigned long *low,
     ptr = ptr + 1;
   }
   if (print_gc_messages_flag) {
-    printf("%d Page locks from %s segment\n",page_lock_count,segment_name);
+    printf("%ld Page locks from %s segment\n",page_lock_count,segment_name);
   }
   allocated_pages = allocated_pages + page_lock_count;
   return(page_lock_count);
@@ -1347,7 +1347,7 @@ long scan_page(long page) {
   end_ptr = ROUND_TO_PAGE(ptr + object_size(ptr) - 1);
   
   if (DEBUG_GC) {
-    printf("scan page %d, ",page);
+    printf("scan page %ld, ",page);
   }
   /* Scan page and any contig pages */
   while (1) {
@@ -1361,7 +1361,7 @@ long scan_page(long page) {
 	lisp_debug();
       } else {
 	if (DEBUG_GC) {
-	  printf("next page: %d\n",next_page);
+	  printf("next page: %ld\n",next_page);
 	}
 	return(next_page);
       }
@@ -1406,7 +1406,7 @@ void full_gc() {
 
   inside_gc_flag = 1;    
   if (print_gc_messages_flag) {
-    printf("GC called. Frontier page = %d\n",frontier_page);
+    printf("GC called. Frontier page = %ld\n",frontier_page);
   }
 
   terminate_page();
@@ -1421,7 +1421,7 @@ void full_gc() {
   gc_count = gc_count + 1;
   gettimeofday(&end_tv, 0);
   timersub(&end_tv, &start_tv, &elapsed_tv);
-  printf("GC elapsed_tv is %d.%06d\n", elapsed_tv.tv_sec, elapsed_tv.tv_usec);
+  printf("GC elapsed_tv is %ld.%06ld\n", elapsed_tv.tv_sec, elapsed_tv.tv_usec);
   printf("GC done, checking memory...");
   check_memory(0,frontier_page,0);
   printf("done\n\n");

@@ -61,18 +61,12 @@ int double_float_to_string(double f, char *buffer) {
   return(size);
 }
 
-double double_round(x, y)
-     double x; double y;
-{
-  double result;
-
-  result = rint(x / y);
+double double_round(double x, double y) {
+  return(rint(x / y));
 }
 
 int double_truncate (double x, double y) {
-  int i;
-  
-  i = (x / y);
+  int i = (x / y);
   return(i);
 }
 

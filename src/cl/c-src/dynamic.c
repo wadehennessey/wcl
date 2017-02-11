@@ -36,7 +36,7 @@ void verify_chain() {
   UW_POINT *uwp;
 
   for (uwp = uw_top; uwp != NULL; uwp = uwp->next) {
-    printf("address = %x, type = %d\n",uwp,uwp->type);
+    printf("address = %p, type = %d\n",uwp,uwp->type);
   }
 }
 

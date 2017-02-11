@@ -15,7 +15,9 @@ FILE *get_file_ptr(int index) {
   case 0: return(stdin);
   case 1: return(stdout);
   case 2: return(stderr);
-  default: printf("get_file_ptr: %d too large\n", index);
+  default: 
+    printf("get_file_ptr: %d too large\n", index);
+    return(0);
   }
 }
 
@@ -57,6 +59,7 @@ LP truename(char *path, int result_type) {
     switch (result_type) {
     case 0: return((LP) strdup(truename));	/*  result for C */
     case 1: return(copy_c_to_lisp_string(truename)); /*  result for Lisp */
+    default: return(0);
     }
   }
 }
@@ -122,6 +125,7 @@ LP read_byte(FILE *file, int element_type, LP eof_error_p, LP eof_value) {
     break;
   default:
     printf("Bogus stream element type\n");
+    return(0);
   }
   if (count == 0) {
     if (eof_error_p == NIL) {

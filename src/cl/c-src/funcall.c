@@ -62,7 +62,7 @@ LP ubf_handler(ARGC argc, ...) {
   }
   END_VAR_ARGS;
 
-  printf("Undefined function handler called with %d %s\n",
+  printf("Undefined function handler called with %ld %s\n",
 	 argc,((argc == 1) ? "argument" : "arguments"));
 
   printf("Undefined function handler\n");
