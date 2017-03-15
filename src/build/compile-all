@@ -1,5 +1,6 @@
 #!/bin/bash
-export LD_LIBRARY_PATH="../../dist-lib:/home/wade/rtgc"
+export LD_LIBRARY_PATH="../../dist-lib:../../../rtgc"
+ldd ../../bin/wcl
 ../../dist-bin/wcl -m 32000 < compile-cl-script.lisp
 #../../bin/wcl -m 24000 < compile-clx-script.lisp
 
