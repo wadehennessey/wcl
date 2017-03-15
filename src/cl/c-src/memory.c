@@ -264,7 +264,7 @@ void *wcl_get_closure_env(LP ptr) {
 }
 
 #if RTGC
-#include "/home/wade/rtgc/allocate.h"
+#include "../../../../rtgc/allocate.h"
 
 LP wcl_wb(LPL lhs_address, LP rhs) {
   return(RTwrite_barrier(lhs_address, rhs));

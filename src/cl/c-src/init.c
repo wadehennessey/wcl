@@ -8,7 +8,7 @@
 #include <stdio.h>
 #if RTGC
 #include "pthread.h"
-#include "/home/wade/rtgc/allocate.h"
+#include "../../../../rtgc/allocate.h"
 #endif
 
 extern char *optarg;
